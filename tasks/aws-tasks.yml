@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+
+  upload-artifacts-to-s3:
+    cmds:
+      - ./"{{.TASKS_DIR}}"/cmd/upload_to_s3.sh "{{.BUCKET_NAME_OR_S3_URI}}" "{{.S3_OPTIONAL_PREFIX}}"

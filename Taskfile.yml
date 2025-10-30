@@ -1,0 +1,30 @@
+version: '3'
+
+includes:
+  clisql: ./tasks/clisql-tasks.yml
+  aws: ./tasks/aws-tasks.yml
+
+env:
+  ENV_DIR: .env
+  TASKS_DIR: tasks
+  DOTENV_FILENAME: der.env
+
+dotenv: ['{{.ENV_DIR}}/{{env "DOTENV_FILENAME"}} | default {{.ENV_DIR}}/demo.env']
+
+tasks:
+
+  demo-up:
+    summary: |
+      Usage: `task demo-up` if using the default demo.env file. Use `DOTENV_FILENAME=custom.env task demo-up` 
+      if using a custom .env file (filenane does not have to be custom.env, but must end with .env).
+
+    cmds:
+      - task: clisql:process-sql-folder
+        vars:
+          TASKS_DIR: $TASKS_DIR
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+      - task: aws:upload-artifacts-to-s3
+        vars:
+          TASKS_DIR: $TASKS_DIR
+          BUCKET_NAME_OR_S3_URI: $BUCKET_NAME_OR_S3_URI
+          S3_OPTIONAL_PREFIX: $S3_OPTIONAL_PREFIX
