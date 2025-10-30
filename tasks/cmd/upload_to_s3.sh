@@ -4,8 +4,9 @@ set -euo pipefail
 # Usage: ./tasks/cmd/upload_to_s3.sh <bucket-name-or-s3-uri> [optional/prefix]
 # Uploads contents of the `upload` directory located at the project root.
 
-# Resolve project root as the current working directory (assumes script is executed from project root)
-project_root="$(pwd)"
+# Resolve project root from script location (works regardless of execution directory)
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+project_root="$(cd "$script_dir/../.." && pwd)"
 upload_dir="$project_root/tasks/upload"
 
 # Check for AWS CLI
