@@ -37,6 +37,13 @@ fi
 bucket="$1"
 prefix="${2:-}"
 
+# Validate bucket name is not empty
+if [ -z "$bucket" ]; then
+  echo "Error: Bucket name cannot be empty." >&2
+  echo "Usage: $0 <bucket-name-or-s3-uri> [optional/prefix]" >&2
+  exit 1
+fi
+
 # Normalize bucket URI to start with s3://
 if [[ "$bucket" != s3://* ]]; then
   bucket="s3://$bucket"
