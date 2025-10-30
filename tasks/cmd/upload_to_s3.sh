@@ -20,6 +20,12 @@ if [ ! -d "$upload_dir" ]; then
   exit 1
 fi
 
+# Check if upload directory is empty
+if [ -z "$(ls -A "$upload_dir")" ]; then
+  echo "Warning: Directory \`$upload_dir\` is empty. Nothing to upload." >&2
+  exit 0
+fi
+
 # Validate input parameters
 if [ $# -lt 1 ]; then
   echo "Usage: $0 <bucket-name-or-s3-uri> [optional/prefix]" >&2
