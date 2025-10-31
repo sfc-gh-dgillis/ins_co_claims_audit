@@ -1,7 +1,0 @@
-version: '3'
-
-tasks:
-
-  process-sql-folder:
-    cmds:
-      - python3 ./"{{.TASKS_DIR}}"/pyutil/snowclisp/snowclisp.py ./"{{.TASKS_DIR}}"/sql "{{.CLI_CONNECTION_NAME}}"

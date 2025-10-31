@@ -1,0 +1,20 @@
+version: '3'
+
+tasks:
+
+  validate-homebrew:
+    cmds:
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_homebrew.sh"
+
+  validate-openssl:
+    cmds:
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_openssl.sh
+
+  validate-snowcli:
+    cmds:
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_snowcli.sh
+
+  validate-awscli:
+    desc: Validates that the AWS CLI is configured correctly by attempting to get the caller identity.
+    cmds:
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_aws_login.sh

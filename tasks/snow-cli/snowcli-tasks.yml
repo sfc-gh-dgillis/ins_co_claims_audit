@@ -1,0 +1,7 @@
+version: '3'
+
+tasks:
+
+  sort-and-process-sql-folder:
+    cmds:
+      - python3 ./"{{.TASKS_DIR}}"/snow-cli/snowclisp/snowclisp.py ./"{{.TASKS_DIR}}"/snow-cli/sql "{{.CLI_CONNECTION_NAME}}"
