@@ -3,6 +3,6 @@ version: '3'
 tasks:
 
   upload-to-s3:
-    desc: Uploads all files in the tasks/awscli-upload-to-s3/upload directory to the provided S3 bucket
+    desc: Uploads all files in the tasks/aws-cli/upload directory to the provided S3 bucket
     cmds:
-      - ./"{{.TASKS_DIR}}"/awscli-upload-to-s3/cmd/upload_to_s3.sh "{{.BUCKET_NAME_OR_S3_URI}}" "{{.S3_OPTIONAL_PREFIX}}"
+      - ./tasks/aws-cli/cmd/upload_to_s3.sh "{{.BUCKET_NAME_OR_S3_URI}}" "{{.S3_OPTIONAL_PREFIX}}"

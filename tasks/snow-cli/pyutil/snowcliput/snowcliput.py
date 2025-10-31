@@ -170,35 +170,29 @@ def main():
     Main entry point for command-line execution.
     
     Usage:
-        python upload_to_snowflake.py <connection_name> <stage_name> [upload_directory]
+        python snowcliput.py <directory> <connection_name> <stage_name>
     
     Example:
-        python upload_to_snowflake.py my_connection loss_evidence
-        python upload_to_snowflake.py my_connection @loss_evidence ./custom_upload_dir
+        python snowcliput.py ./tasks/snow-cli/upload my_connection loss_evidence
+        python snowcliput.py ./data my_connection @loss_evidence
     """
-    if len(sys.argv) < 3:
-        print("Error: Missing required arguments", file=sys.stderr)
-        print("\nUsage: python upload_to_snowflake.py <connection_name> <stage_name> [upload_directory]")
+    if len(sys.argv) < 4:
+        print("Usage: python snowcliput.py <directory> <connection_name> <stage_name>")
         print("\nArguments:")
+        print("  directory         : Path to directory containing files to upload")
         print("  connection_name   : Snowflake CLI connection name")
         print("  stage_name        : Snowflake internal stage name (with or without @ prefix)")
-        print("  upload_directory  : Optional. Path to upload directory (default: ./tasks/snow-cli/upload)")
         print("\nExample:")
-        print("  python upload_to_snowflake.py my_connection loss_evidence")
-        print("  python upload_to_snowflake.py my_connection @loss_evidence ./data")
+        print("  python snowcliput.py ./tasks/snow-cli/upload my_connection loss_evidence")
+        print("  python snowcliput.py ./data demo_connection @loss_evidence")
         sys.exit(1)
     
-    connection_name = sys.argv[1]
-    stage_name = sys.argv[2]
+    directory = sys.argv[1]
+    connection_name = sys.argv[2]
+    stage_name = sys.argv[3]
     
-    # Determine upload directory
-    if len(sys.argv) >= 4:
-        upload_dir = Path(sys.argv[3])
-    else:
-        # Default to snow-cli/upload directory relative to script location
-        script_dir = Path(__file__).parent
-        project_root = script_dir.parent.parent.parent if 'tasks' in script_dir.parts else script_dir
-        upload_dir = project_root / 'tasks' / 'snow-cli' / 'upload'
+    # Convert directory string to Path
+    upload_dir = Path(directory)
     
     # Validate inputs
     if not connection_name or not connection_name.strip():
@@ -210,6 +204,9 @@ def main():
         sys.exit(1)
     
     try:
+        # Print directory being scanned (like snowclisp does)
+        print(f"Scanning directory: {directory}")
+        
         successful, failed, error_messages = upload_directory_to_stage(
             connection_name=connection_name,
             upload_dir=upload_dir,
@@ -241,7 +238,6 @@ def main():
     except Exception as e:
         print(f"\nERROR: Unexpected error: {e}", file=sys.stderr)
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()
