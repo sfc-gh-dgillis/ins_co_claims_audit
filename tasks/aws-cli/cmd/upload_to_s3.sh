@@ -52,12 +52,16 @@ fi
 # Ensure trailing slash on source to copy contents, not the directory itself
 src="$upload_dir/"
 
-# Build destination (allow optional prefix)
+# If prefix is provided
 if [ -n "$prefix" ]; then
+  # Remove leading "/" character if present to avoid double slashes in S3 URI
   prefix="${prefix#/}"
+  # Remove trailing "/" character if present to ensure single slash in S3 URI
   prefix="${prefix%/}"
+  #
   dest="$bucket/$prefix/"
 else
+  # No prefix provided, upload to bucket root
   dest="$bucket/"
 fi
 
