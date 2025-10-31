@@ -6,8 +6,8 @@ set -euo pipefail
 
 # Resolve project root from script location (works regardless of execution directory)
 script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-project_root="$(cd "$script_dir/../.." && pwd)"
-upload_dir="$project_root/tasks/upload"
+project_root="$(cd "$script_dir/../../.." && pwd)"
+upload_dir="$project_root/tasks/aws-cli/upload"
 
 # Check for AWS CLI
 if ! command -v aws >/dev/null 2>&1; then

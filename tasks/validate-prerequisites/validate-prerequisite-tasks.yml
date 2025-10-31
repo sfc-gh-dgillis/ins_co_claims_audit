@@ -2,19 +2,26 @@ version: '3'
 
 tasks:
 
-  validate-homebrew:
+  homebrew:
+    desc: Validates that Homebrew is installed.
     cmds:
-      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_homebrew.sh"
+      - chmod +x ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-homebrew.sh
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-homebrew.sh
 
-  validate-openssl:
+  openssl:
+    desc: Validates that OpenSSL is installed.
     cmds:
-      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_openssl.sh
+      - chmod +x ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-openssl.sh
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-openssl.sh
 
-  validate-snowcli:
+  snowcli:
+    desc: Validates that Snowflake CLI is installed.
     cmds:
-      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_snowcli.sh
+      - chmod +x ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-snowcli.sh
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-snowcli.sh
 
-  validate-awscli:
+  awscli:
     desc: Validates that the AWS CLI is configured correctly by attempting to get the caller identity.
     cmds:
-      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate_aws_login.sh
+      - chmod +x ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-awscli.sh
+      - ./"{{.TASKS_DIR}}"/validate-prerequisites/cmd/validate-awscli.sh

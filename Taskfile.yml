@@ -3,6 +3,7 @@ version: '3'
 includes:
   snow-cli: ./tasks/snow-cli/snowcli-tasks.yml
   aws-cli: ./tasks/aws-cli/awscli-tasks.yml
+  validate-prerequisites: ./tasks/validate-prerequisites/validate-prerequisite-tasks.yml
 
 env:
   ENV_DIR: .env
@@ -18,12 +19,18 @@ tasks:
       if using a custom .env file (filename does not have to be custom.env, but must end with .env).
 
     cmds:
+      - task: validate-prerequisites:homebrew
+        silent: true
+      - task: validate-prerequisites:snowcli
+        silent: true
+      - task: validate-prerequisites:awscli
+        silent: true
       - task: snow-cli:sort-and-process-sql-folder
         vars:
           TASKS_DIR: $TASKS_DIR
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
-#      - task: aws:upload-artifacts-to-s3
-#        vars:
-#          TASKS_DIR: $TASKS_DIR
-#          BUCKET_NAME_OR_S3_URI: $BUCKET_NAME_OR_S3_URI
-#          S3_OPTIONAL_PREFIX: $S3_OPTIONAL_PREFIX
+      - task: aws-cli:upload-to-s3
+        vars:
+          TASKS_DIR: $TASKS_DIR
+          BUCKET_NAME_OR_S3_URI: $BUCKET_NAME_OR_S3_URI
+          S3_OPTIONAL_PREFIX: $S3_OPTIONAL_PREFIX
