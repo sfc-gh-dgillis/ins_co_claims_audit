@@ -50,14 +50,14 @@
         "tool_spec": {
           "type": "cortex_search",
           "name": "Guidelines",
-          "description": ""
+          "description": "Search tool for accessing insurance claims processing guidelines and regulatory requirements."
         }
       },
       {
         "tool_spec": {
           "type": "cortex_search",
           "name": "claim_notes",
-          "description": ""
+          "description": "Search tool for querying claim notes and documentation."
         }
       },
       {
