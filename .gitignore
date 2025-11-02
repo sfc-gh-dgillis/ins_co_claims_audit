@@ -27,3 +27,6 @@ tasks.json
 *.dll
 *.so
 *.dylib
+
+# .env files
+*.env
