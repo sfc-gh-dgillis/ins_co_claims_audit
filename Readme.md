@@ -1,6 +1,9 @@
-## ins_claims_audit
-Using Snowflake Cortex Analyst, Cortex Search, Cortex AI SQL, and Streamlit, we are receiving claims data and allowing users to ask both predefined and free-form questions about the claims. We are also describing images and comparing them to claim descriptions to determine if the supporting evidence aligns with the description.
+## Insurance Claims Agent Demo
+Using Snowflake Cortex Analyst, Cortex Search, Cortex AI SQL, Cortex Agents, and Snowflake Intelligence we are receiving claims data and allowing users to ask both predefined and free-form questions about the claims. We are also describing images and comparing them to claim descriptions to determine if the supporting evidence aligns with the description.
 
+We are able to join unstructured and structured data by combining structured claims data with unstructured data from claim file notes, state insurance guidelines, invoices, and call transcriptions.
+
+<img width="957" height="719" alt="Screenshot 2025-10-30 at 4 14 02 PM" src="https://github.com/user-attachments/assets/436f4dfc-6eab-48d1-b148-5c07f632cbb9" />
 
 # Setup
 1. Run the setup.sql file to create all objects needed for the demo
@@ -31,10 +34,12 @@ In the setup.sql file we create the following objects:
 3. The setup script creates a 'Models' stage. Please upload the following .yaml file and create a Cortex Analyst using this .yaml file
    * CA_INS_CO 8_20_2025, 4_52 PM.yaml
 4. Create a new Streamlit app in the database and schema and paste the streamlit.py file into SIS
+5. Alternatively, you can create an Agent and use this in Snowflake intelligence
+   6. Run Tools config
+   7. Run Agents config
+  
+6. 
 
- 
-AGENTS---
 
-1. Run Tools config
-2. Run Agents config
+
 
