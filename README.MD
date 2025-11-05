@@ -75,3 +75,34 @@ Choose one of the following methods for deploying the user interface:
 1.  Create an **Agent** and use it directly within Snowflake Intelligence.
 2.  Run the **Tools config**.
 3.  Run the **Agents config**.
+
+
+### Sample Questions this demo helps answer:
+
+Claims Audit Questions
+
+Payment Processing Time: What percentage of payments were issued to the vendor within the following timeframes after invoice receipt?
+
+3–5 calendar days
+
+8–13 calendar days
+
+14–29 calendar days
+
+30+ calendar days
+
+Reserve Rationale Presence: Was a reserve rationale documented in the claim file notes?
+
+Reserve Rationale Sufficiency: Did the reserve rationale adequately explain the reserve figure(s) set?
+
+Reserve Extension Timeliness: Was the reserve extension requested in a timely manner?
+
+Payment Over Reserve: Was a payment issued in excess of the current reserve amount on an open claim?
+
+Authority Violation (Reserves/Payments): Were the reserving or payment amounts in excess of the examiner's authority?
+
+Authority Compliance: When the claim exceeded the examiner's authority, were all elements of authority properly handled?
+
+Payment Compliance: Was the payment made according to the state guidelines?
+
+Settlement Timeliness: According to the state guidelines, was the claim settled within the required timelines?
