@@ -113,7 +113,7 @@ Choose one of the following methods for deploying the user interface:
 
 12.  Confirm that the images shown here align with the claim made
 
-🎯 Who Should Care? (Target Audience)
+🎯 ## Who Should Care? (Target Audience)
 
 | Role/Department | Value Proposition |
 | :--- | :--- |
