@@ -42,6 +42,8 @@ Follow these steps to set up the environment and run the demo.
         * `Parsed_invoices`
         * `Parsed_guidelines`
         * `Parsed_claim_notes`
+        * `GUIDELINES_CHUNK_TABLE`
+        * `NOTES_CHUNK_TABLE`
 
 ### Step 2: Upload Evidence Files
 
@@ -79,30 +81,40 @@ Choose one of the following methods for deploying the user interface:
 
 ### Sample Questions this demo helps answer:
 
-Payment Processing Time: What percentage of payments were issued to the vendor within the following timeframes after invoice receipt?
+1.  Payment Processing Time: What percentage of payments were issued to the vendor within the following timeframes after invoice receipt?
 
-3–5 calendar days
+    * 3–5 calendar days
 
-8–13 calendar days
+    * 8–13 calendar days
 
-14–29 calendar days
+    * 14–29 calendar days
 
-30+ calendar days
+    * 30+ calendar days
 
-Reserve Rationale Presence: Was a reserve rationale documented in the claim file notes?
+2.  Reserve Rationale Presence: Was a reserve rationale documented in the claim file notes?
 
-Reserve Rationale Sufficiency: Did the reserve rationale adequately explain the reserve figure(s) set?
+3.  Reserve Rationale Sufficiency: Did the reserve rationale adequately explain the reserve figure(s) set?
 
-Reserve Extension Timeliness: Was the reserve extension requested in a timely manner?
+4.  Reserve Extension Timeliness: Was the reserve extension requested in a timely manner?
 
-Payment Over Reserve: Was a payment issued in excess of the current reserve amount on an open claim?
+5.  Payment Over Reserve: Was a payment issued in excess of the current reserve amount on an open claim?
 
-Authority Violation (Reserves/Payments): Were the reserving or payment amounts in excess of the examiner's authority?
+6.  Authority Violation (Reserves/Payments): Were the reserving or payment amounts in excess of the examiner's authority?
 
-Authority Compliance: When the claim exceeded the examiner's authority, were all elements of authority properly handled?
+7.  Authority Compliance: When the claim exceeded the examiner's authority, were all elements of authority properly handled?
 
-Payment Compliance: Was the payment made according to the state guidelines?
+8.  Payment Compliance: Was the payment made according to the state guidelines?
 
-Settlement Timeliness: According to the state guidelines, was the claim settled within the required timelines?
+9.  Settlement Timeliness: According to the state guidelines, was the claim settled within the required timelines?
+
+10.  Al driven summary of the image
+
+11.  Invoice data extraction and validating with the payments made
+
+12.  Confirm that the images shown here align with the claim made
+
+🎯 Who Should Care? (Target Audience)
+
+This demo is designed to address key pain points across multiple roles within an insurance organization.Role/DepartmentValue PropositionClaims Adjusters/ExaminersFaster, More Accurate Decisions. The agent instantly synthesizes information from all sources (structured data, notes, images, guidelines), providing a fast, data-driven assessment. The image comparison feature is valuable for fraud detection and evidence verification.Claims Managers / VPs of ClaimsOperational Efficiency and Consistency. Demonstrates how to reduce the claim cycle time, ensure consistent application of company/state guidelines (by querying the Parsed_guidelines table), and handle higher claim volumes without proportional staff increases.Special Investigations Unit (SIU) / Anti-FraudAdvanced Fraud Detection. The system's ability to join structured data with unstructured files (like call transcripts for tone analysis) and compare image evidence against claim descriptions is a powerful tool for flagging suspicious or inconsistent claims.IT & Data Science / Data EngineeringLeveraging Modern Data Architecture. This demo validates the use case for Snowflake Cortex and demonstrates that the data platform can handle unstructured data (PDFs, images, audio) alongside core transactional data, increasing the value of their data investment.Compliance & Legal TeamsAuditability and Compliance. By combining structured data with parsed state guidelines, the system helps ensure claims decisions are compliant with regulations, providing a clear, auditable trail for every decision.Chief Operating Officer (COO)Cost Reduction and Customer Experience. Automating document ingestion and accelerating the decision process directly reduces operational costs and leads to faster, more positive interactions for policyholders.
 
 
