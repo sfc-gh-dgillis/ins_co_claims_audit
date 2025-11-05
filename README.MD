@@ -60,7 +60,7 @@ Follow these steps to set up the environment and run the demo.
 
 1.  The setup script automatically creates a **`Models`** stage.
 2.  Upload the following `.yaml` file to the `Models` stage:
-    * `CA_INS_CO 8_20_2025, 4_52 PM.yaml`
+    * `CA_INS_CO`
 3.  **Create a Cortex Analyst** using the uploaded `.yaml` configuration file.
 
 ### Step 4: Deploy the Interface
@@ -113,7 +113,7 @@ Choose one of the following methods for deploying the user interface:
 
 12.  Confirm that the images shown here align with the claim made
 
-🎯 ## Who Should Care? (Target Audience)
+🎯 ### Who Should Care? (Target Audience)
 
 | Role/Department | Value Proposition |
 | :--- | :--- |
