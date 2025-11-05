@@ -3,7 +3,8 @@ Using Snowflake Cortex Analyst, Cortex Search, Cortex AI SQL, Cortex Agents, and
 
 We are able to join unstructured and structured data by combining structured claims data with unstructured data from claim file notes, state insurance guidelines, invoices, and call transcriptions.
 
-<img width="957" height="719" alt="Screenshot 2025-10-30 at 4 14 02 PM" src="https://github.com/user-attachments/assets/436f4dfc-6eab-48d1-b148-5c07f632cbb9" />
+<img width="1069" height="748" alt="Screenshot 2025-11-05 at 2 40 51 PM" src="https://github.com/user-attachments/assets/e92c1fb4-fe6e-42df-8cdc-96c582ad8c50" />
+
 
 # Setup
 1. Run the setup.sql file to create all objects needed for the demo
