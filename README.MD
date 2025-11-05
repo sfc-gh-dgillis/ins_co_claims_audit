@@ -8,7 +8,7 @@ It processes claims data, handles both structured and unstructured information, 
 
 This demo leverages the following Snowflake tools to deliver an intelligent claims processing solution:
 
-* **Snowflake Cortex Analyst, Cortex Search, AISQL, and Agents:** Used for sophisticated data analysis and query generation.
+* **Snowflake Cortex Analyst (using Semantic Views), Cortex Search, AISQL, and Agents:** Used for sophisticated data analysis and query generation.
 * **Snowflake Intelligence:** Serves as the UI which enables users to ask complex questions about claims.
 * **Multimodal Analysis:** Describes and compares claims images with the claim description to verify if **supporting evidence aligns with the reported incident**.
 * **Audio Transcription:** Transcribes text from an audio or video file with optional timestamps and speaker labels.
@@ -51,7 +51,7 @@ Follow these steps to set up the environment and run the demo.
     * `1899_claim_evidence1.jpeg`
     * `1899_claim_evidence2.jpeg`
     * `Claim_Notes.pdf`
-    * `Guidelines.docx`
+    * `Guidelines.pdf`
     * `invoice.png`
     * `Gemini_generated_3.jpeg`
     * `ins_co_1899_call.wav`
@@ -59,9 +59,9 @@ Follow these steps to set up the environment and run the demo.
 ### Step 3: Configure Cortex Analyst
 
 1.  The setup script automatically creates a **`Models`** stage.
-2.  Upload the following `.yaml` file to the `Models` stage:
+2.  Upload the following `.sql` file to create a semantic view:
     * `CA_INS_CO`
-3.  **Create a Cortex Analyst** using the uploaded `.yaml` configuration file.
+3.  **Create a Cortex Analyst** using the uploaded `.sql` configuration file.
 
 ### Step 4: Deploy the Interface
 
