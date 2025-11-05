@@ -1,10 +1,8 @@
-That's a great starting point! A README should be clear, concise, and easy to skim. Here's a revised version that uses better structure, formatting, and clearer language to make it more readable.
-
----
-
 ## 🛡️ Insurance Claims Agent Demo
 
-This repository showcases a powerful insurance claims agent built using **Snowflake Cortex** services. It processes claims data, handles both structured and unstructured information, and allows users to gain insights through pre-defined and free-form questions.
+This repository showcases a powerful insurance claims agent built using **Snowflake Cortex** services. 
+
+It processes claims data, handles both structured and unstructured information, and allows users to gain insights through free-form questions.
 
 ### ✨ Key Features & Technology
 
@@ -76,9 +74,3 @@ Choose one of the following methods for deploying the user interface:
 1.  Create an **Agent** and use it directly within Snowflake Intelligence.
 2.  Run the **Tools config**.
 3.  Run the **Agents config**.
-
----
-
-This version organizes the content into clear sections, uses bolding for emphasis, and formats the setup steps for easier execution.
-
-Would you like me to refine the language further, or perhaps help you draft a compelling *project goal* statement for the top of the README?
