@@ -20,9 +20,9 @@ A core capability is the ability to join **unstructured** and **structured** dat
 * **Structured Data:** Claims, financial transactions, and authorization records.
 * **Unstructured Data:** Claim file notes, state insurance guidelines, invoices, claim photo eveidens, and audio call files.
 
-
-
 ---
+
+<img width="1069" height="748" alt="Screenshot 2025-11-05 at 2 40 51 PM" src="https://github.com/user-attachments/assets/e92c1fb4-fe6e-42df-8cdc-96c582ad8c50" />
 
 ## 🛠️ Setup Instructions
 
