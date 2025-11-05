@@ -79,8 +79,6 @@ Choose one of the following methods for deploying the user interface:
 
 ### Sample Questions this demo helps answer:
 
-Claims Audit Questions
-
 Payment Processing Time: What percentage of payments were issued to the vendor within the following timeframes after invoice receipt?
 
 3–5 calendar days
@@ -106,3 +104,5 @@ Authority Compliance: When the claim exceeded the examiner's authority, were all
 Payment Compliance: Was the payment made according to the state guidelines?
 
 Settlement Timeliness: According to the state guidelines, was the claim settled within the required timelines?
+
+
