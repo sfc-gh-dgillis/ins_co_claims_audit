@@ -115,12 +115,11 @@ Choose one of the following methods for deploying the user interface:
 
 🎯 Who Should Care? (Target Audience)
 
-Role/Department,Value Proposition
-Claims Adjusters/Examiners,"Faster, More Accurate Decisions. The agent instantly synthesizes information from all sources (structured data, notes, images, guidelines), providing a fast, data-driven assessment. The image comparison feature is valuable for fraud detection and evidence verification."
-Claims Managers / VPs of Claims,"Operational Efficiency and Consistency. Demonstrates how to reduce the claim cycle time, ensure consistent application of company/state guidelines (by querying the Parsed_guidelines table), and handle higher claim volumes without proportional staff increases."
-Special Investigations Unit (SIU) / Anti-Fraud,Advanced Fraud Detection. The system's ability to join structured data with unstructured files (like call transcripts for tone analysis) and compare image evidence against claim descriptions is a powerful tool for flagging suspicious or inconsistent claims.
-IT & Data Science / Data Engineering,"Leveraging Modern Data Architecture. This demo validates the use case for Snowflake Cortex and demonstrates that the data platform can handle unstructured data (PDFs, images, audio) alongside core transactional data, increasing the value of their data investment."
-Compliance & Legal Teams,"Auditability and Compliance. By combining structured data with parsed state guidelines, the system helps ensure claims decisions are compliant with regulations, providing a clear, auditable trail for every decision."
-Chief Operating Officer (COO),"Cost Reduction and Customer Experience. Automating document ingestion and accelerating the decision process directly reduces operational costs and leads to faster, more positive interactions for policyholders."
-
-
+| Role/Department | Value Proposition |
+| :--- | :--- |
+| **Claims Adjusters/Examiners** | **Faster, More Accurate Decisions.** The agent instantly synthesizes information from all sources (structured data, notes, images, guidelines), providing a fast, data-driven assessment. The image comparison feature is valuable for fraud detection and evidence verification. |
+| **Claims Managers / VPs of Claims** | **Operational Efficiency and Consistency.** Demonstrates how to reduce the claim cycle time, ensure consistent application of company/state guidelines (by querying the `Parsed_guidelines` table), and handle higher claim volumes without proportional staff increases. |
+| **Special Investigations Unit (SIU) / Anti-Fraud** | **Advanced Fraud Detection.** The system's ability to join structured data with unstructured files (like call transcripts for tone analysis) and compare image evidence against claim descriptions is a powerful tool for flagging suspicious or inconsistent claims. |
+| **IT & Data Science / Data Engineering** | **Leveraging Modern Data Architecture.** This demo validates the use case for **Snowflake Cortex** and demonstrates that the data platform can handle unstructured data (PDFs, images, audio) alongside core transactional data, increasing the value of their data investment. |
+| **Compliance & Legal Teams** | **Auditability and Compliance.** By combining structured data with parsed state guidelines, the system helps ensure claims decisions are compliant with regulations, providing a clear, auditable trail for every decision. |
+| **Chief Operating Officer (COO)** | **Cost Reduction and Customer Experience.** Automating document ingestion and accelerating the decision process directly reduces operational costs and leads to faster, more positive interactions for policyholders. |
