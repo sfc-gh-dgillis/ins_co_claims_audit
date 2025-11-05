@@ -2,22 +2,23 @@
 
 This repository showcases a powerful insurance claims agent built using **Snowflake Cortex** services. 
 
-It processes claims data, handles both structured and unstructured information, and allows users to gain insights through free-form questions.
+It processes claims data, handles both structured and unstructured information, and allows users to gain insights through natural language.
 
 ### ✨ Key Features & Technology
 
 This demo leverages the following Snowflake tools to deliver an intelligent claims processing solution:
 
-* **Snowflake Cortex Analyst, Search, AI SQL, and Agents:** Used for sophisticated data analysis and query generation.
-* **Snowflake Intelligence:** Enables users to ask complex questions about claims.
+* **Snowflake Cortex Analyst, Cortex Search, AISQL, and Agents:** Used for sophisticated data analysis and query generation.
+* **Snowflake Intelligence:** Serves as the UI which enables users to ask complex questions about claims.
 * **Multimodal Analysis:** Describes and compares claims images with the claim description to verify if **supporting evidence aligns with the reported incident**.
+* **Audio Transcription:** Transcribes text from an audio or video file with optional timestamps and speaker labels.
 
 ### 🔗 Data Integration
 
 A core capability is the ability to join **unstructured** and **structured** data, providing a complete view of each claim.
 
 * **Structured Data:** Claims, financial transactions, and authorization records.
-* **Unstructured Data:** Claim file notes, state insurance guidelines, invoices, and call transcriptions.
+* **Unstructured Data:** Claim file notes, state insurance guidelines, invoices, claim photo eveidens, and audio call files.
 
 
 
@@ -64,7 +65,7 @@ Follow these steps to set up the environment and run the demo.
 
 Choose one of the following methods for deploying the user interface:
 
-#### Option A: Streamlit in Snowflake (Recommended)
+#### Option A: Streamlit in Snowflake
 
 1.  Create a new **Streamlit application** within the `ins_co` database and `loss_claims` schema.
 2.  Paste the contents of the **`streamlit.py`** file into the Streamlit in Snowflake (SIS) editor.
