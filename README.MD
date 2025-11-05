@@ -75,8 +75,9 @@ Choose one of the following methods for deploying the user interface:
 #### Option B: Snowflake Intelligence Agent
 
 1.  Create an **Agent** and use it directly within Snowflake Intelligence.
-2.  Run the **Tools config**.
-3.  Run the **Agents config**.
+2.  Run **Custom_tools.sql**.
+3.  Run the **Tools config**.
+4.  Run the **Agents config**.
 
 
 ### Sample Questions this demo helps answer:
