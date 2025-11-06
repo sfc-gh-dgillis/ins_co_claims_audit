@@ -1,9 +1,10 @@
 version: '3'
 
 includes:
-  snow-cli: ./tasks/snow-cli/snowcli-tasks.yml
-  aws-cli: ./tasks/aws-cli/awscli-tasks.yml
   validate-prerequisites: ./tasks/validate-prerequisites/validate-prerequisite-tasks.yml
+  snow-cli: ./tasks/snow-cli/snowcli-tasks.yml
+  agent: ./tasks/agent/agent-tasks.yml
+  python: ./tasks/python/python-tasks.yml
 
 env:
   ENV_DIR: .env
@@ -12,28 +13,29 @@ dotenv: ['{{ .ENV_DIR }}/{{ .DOTENV_FILENAME | default "demo.env" }}']
 
 tasks:
 
+  python-setup-for-agents:
+    desc: Setup Python environment with required packages for agent tasks.
+    cmds:
+      - task: python:create-venv
+      - task: python:install-packages
+
   demo-up:
     desc: |
       Usage: `task demo-up` if using the default demo.env file. Use `DOTENV_FILENAME=custom.env task demo-up`
       if using a custom .env file (filename does not have to be custom.env, but must end with .env).
 
     cmds:
-      - task: validate-prerequisites:homebrew
-        silent: true
       - task: validate-prerequisites:snowcli
-        silent: true
-      - task: validate-prerequisites:awscli
         silent: true
       - task: snow-cli:sort-and-process-sql-folder
         vars:
           SQL_SORT_PROCESS_DIR: ./tasks/snow-cli/sql
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
-#      - task: aws-cli:upload-to-s3
-#        vars:
-#          BUCKET_NAME_OR_S3_URI: $BUCKET_NAME_OR_S3_URI
-#          S3_OPTIONAL_PREFIX: $S3_OPTIONAL_PREFIX
       - task: snow-cli:upload-files-to-internal-named-stage
         vars:
           UPLOAD_DIR: $UPLOAD_DIR
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
           INTERNAL_NAMED_STAGE: $INTERNAL_NAMED_STAGE
+      - task: agent:create-agents-from-json-files
+        vars:
+          USER_PAT: $USER_PAT

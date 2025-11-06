@@ -2,26 +2,8 @@ version: '3'
 
 tasks:
 
-  homebrew:
-    desc: Validates that Homebrew is installed.
-    cmds:
-      - chmod +x ./tasks/validate-prerequisites/cmd/validate-homebrew.sh
-      - ./tasks/validate-prerequisites/cmd/validate-homebrew.sh
-
-  openssl:
-    desc: Validates that OpenSSL is installed.
-    cmds:
-      - chmod +x ./tasks/validate-prerequisites/cmd/validate-openssl.sh
-      - ./tasks/validate-prerequisites/cmd/validate-openssl.sh
-
   snowcli:
     desc: Validates that Snowflake CLI is installed.
     cmds:
       - chmod +x ./tasks/validate-prerequisites/cmd/validate-snowcli.sh
       - ./tasks/validate-prerequisites/cmd/validate-snowcli.sh
-
-  awscli:
-    desc: Validates that the AWS CLI is configured correctly by attempting to get the caller identity.
-    cmds:
-      - chmod +x ./tasks/validate-prerequisites/cmd/validate-awscli.sh
-      - ./tasks/validate-prerequisites/cmd/validate-awscli.sh
