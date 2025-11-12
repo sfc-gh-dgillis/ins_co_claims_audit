@@ -211,7 +211,7 @@ def main():
             connection_name=connection_name,
             upload_dir=upload_dir,
             stage_name=stage_name,
-            auto_compress=True,
+            auto_compress=False,
             overwrite=True,
             verbose=True
         )
