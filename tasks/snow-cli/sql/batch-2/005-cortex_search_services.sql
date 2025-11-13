@@ -1,7 +1,7 @@
 USE DATABASE ins_co;
 USE SCHEMA ins_co.loss_claims;
 
-CREATE CORTEX SEARCH SERVICE IF NOT EXISTS ins_co_claim_notes
+CREATE OR REPLACE CORTEX SEARCH SERVICE ins_co_claim_notes
   ON chunk
   -- NOTE_CONTENT
   -- ATTRIBUTES claim_no, note_date, note_id
@@ -14,7 +14,7 @@ AS (
   FROM NOTES_CHUNK_TABLE
 );
 
-CREATE CORTEX SEARCH SERVICE IF NOT EXISTS ins_co_guidelines
+CREATE OR REPLACE CORTEX SEARCH SERVICE ins_co_guidelines
   ON chunk
   -- ATTRIBUTES claim_no, note_date, note_id
   WAREHOUSE = compute_wh

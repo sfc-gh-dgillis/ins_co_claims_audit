@@ -1,0 +1,1 @@
+ALTER STAGE ins_co.loss_claims.loss_evidence REFRESH;

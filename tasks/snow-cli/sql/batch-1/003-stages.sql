@@ -1,0 +1,10 @@
+USE DATABASE ins_co;
+USE SCHEMA ins_co.loss_claims;
+
+-- CREATE STAGE IF NOT EXISTS models
+--     DIRECTORY = ( ENABLE = TRUE )
+-- 	ENCRYPTION = ( TYPE = 'SNOWFLAKE_SSE' );
+
+CREATE OR REPLACE STAGE loss_evidence
+    DIRECTORY = ( ENABLE = TRUE )
+	ENCRYPTION = ( TYPE = 'SNOWFLAKE_SSE' );
