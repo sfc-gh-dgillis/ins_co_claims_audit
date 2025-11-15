@@ -11,3 +11,14 @@ tasks:
     desc: Uploads all files from the given directory to a Snowflake Internal stage using the Snowflake CLI and PUT command.
     cmds:
       - python3 ./tasks/snow-cli/pyutil/snowcliput/snowcliput.py "{{.UPLOAD_DIR}}" "{{.CLI_CONNECTION_NAME}}" "{{.INTERNAL_NAMED_STAGE}}"
+
+  deploy-streamlit-app:
+    desc: Deploys a Streamlit app to Snowflake using the Snowflake CLI.
+    dir: "{{.STREAMLIT_APP_DIR}}"
+    cmds:
+      - snow streamlit deploy --replace --prune --open
+
+  drop-database-if-exists:
+    desc: Drops the specified Snowflake database if it exists using the Snowflake CLI.
+    cmds:
+      - snow sql execute --connection "{{.CLI_CONNECTION_NAME}}" --sql "DROP DATABASE IF EXISTS {{.DATABASE_NAME}};"

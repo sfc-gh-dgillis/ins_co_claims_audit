@@ -22,7 +22,6 @@ from snowflake.snowpark.exceptions import SnowparkSQLException
 import tempfile
 import os
 
-
 # --- App Configuration ---
 st.set_page_config(layout="wide", page_title="Insurance Claim Audit POC")
 
@@ -36,9 +35,8 @@ AVAILABLE_SEMANTIC_MODELS_PATHS = [
 ]
 CLAIMS_TABLE_NAME = "INS_CO.LOSS_CLAIMS.CLAIMS"
 CLAIM_LINES_TABLE_NAME = "INS_CO.LOSS_CLAIMS.CLAIM_LINES"
-CLAIM_NOTES_TABLE_NAME = "INS_CO.LOSS_CLAIMS.PARSED_CLAIM_NOTES" 
+CLAIM_NOTES_TABLE_NAME = "INS_CO.LOSS_CLAIMS.PARSED_CLAIM_NOTES"
 CLAIM_IMAGES_STAGE_NAME = "INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE"
-
 
 # --- Snowflake Session Initialization ---
 try:
@@ -60,6 +58,7 @@ def get_claim_numbers() -> List[str]:
         st.error(f"Error fetching claim numbers: {e}")
         return []
 
+
 @st.cache_data(ttl=3600)
 def get_claim_details(claim_number: str) -> Dict:
     """Fetches comprehensive details for a given claim number."""
@@ -72,7 +71,7 @@ def get_claim_details(claim_number: str) -> Dict:
             return details
 
         claim_info = claims_df.iloc[0]
-        
+
         details["loss_description"] = claim_info.get('LOSS_DESCRIPTION', 'N/A')
 
         details_text = (
@@ -82,7 +81,7 @@ def get_claim_details(claim_number: str) -> Dict:
             f"**Cause of Loss:** {claim_info.get('CAUSE_OF_LOSS', 'N/A')}\n"
             f"**Loss Description:** {claim_info.get('LOSS_DESCRIPTION', 'N/A')}\n\n"
         )
-        
+
         # Fetch parsed claim notes using the new table and column.
         notes_df = session.table(CLAIM_NOTES_TABLE_NAME).filter(f"CLAIM_NO = '{claim_number}'").to_pandas()
         if not notes_df.empty:
@@ -91,9 +90,9 @@ def get_claim_details(claim_number: str) -> Dict:
                 details_text += f"- Content: {row.get('EXTRACTED_CONTENT', 'N/A')}\n"
         else:
             details_text += "No parsed claim notes found.\n"
-        
+
         details["claim_details"] = details_text
-        
+
         details["audit_questions"] = [
             f"For claim {claim_number}, was a payment issued to the vendor 3-5 calendar days after the invoice was received? If yes, please provide details.",
             f"For claim {claim_number}, was a payment issued to the vendor 8-13 calendar days after the invoice was received? If yes, please provide details.",
@@ -106,6 +105,7 @@ def get_claim_details(claim_number: str) -> Dict:
     except Exception as e:
         st.error(f"Error fetching claim details: {e}")
         return details
+
 
 @st.cache_data(ttl=3600)
 def list_images_in_stage(stage_name: str) -> List[str]:
@@ -121,6 +121,7 @@ def list_images_in_stage(stage_name: str) -> List[str]:
     except Exception as e:
         st.error(f"Error listing images in stage @{stage_name}: {e}")
         return []
+
 
 @st.cache_data(show_spinner=False)
 def get_query_exec_result(query: str) -> Tuple[Optional[pd.DataFrame], Optional[str]]:
@@ -142,13 +143,13 @@ def get_analyst_response(messages: List[Dict]) -> Tuple[Optional[Dict], Optional
     try:
         with st.spinner("Waiting for Analyst's response..."):
             resp = _snowflake.send_snow_api_request(
-                "POST",           # method
-                API_ENDPOINT,     # path
-                {},               # headers
-                {},               # params
-                request_body,     # body
-                None,             # request_guid
-                API_TIMEOUT       # timeout
+                "POST",  # method
+                API_ENDPOINT,  # path
+                {},  # headers
+                {},  # params
+                request_body,  # body
+                None,  # request_guid
+                API_TIMEOUT  # timeout
             )
         parsed_content = json.loads(resp["content"])
         if resp["status"] < 400:
@@ -158,6 +159,7 @@ def get_analyst_response(messages: List[Dict]) -> Tuple[Optional[Dict], Optional
             return parsed_content, error_msg
     except Exception as e:
         return None, f"An unexpected error occurred during the API call: {e}"
+
 
 @st.cache_data(ttl=3600)
 def get_image_from_stage(stage_name: str, file_name: str) -> Optional[bytes]:
@@ -175,13 +177,15 @@ def get_image_from_stage(stage_name: str, file_name: str) -> Optional[bytes]:
     except Exception as e:
         st.error(f"Error fetching image '{file_name}' from stage @{stage_name}: {e}")
         return None
-        
+
+
 def process_user_input(prompt: str):
     """Adds a user prompt to the chat history and triggers a rerun."""
     if not prompt:
         return
     st.session_state.messages.append({"role": "user", "content": [{"type": "text", "text": prompt}]})
     st.rerun()
+
 
 def get_and_process_analyst_response():
     """Fetches the analyst response for the last user message and updates the state."""
@@ -191,8 +195,10 @@ def get_and_process_analyst_response():
     elif response and "message" in response and "content" in response["message"]:
         analyst_message = {"role": "analyst", "content": response["message"]["content"]}
     else:
-        analyst_message = {"role": "analyst", "content": [{"type": "text", "text": "Sorry, I received an empty response."}]}
+        analyst_message = {"role": "analyst",
+                           "content": [{"type": "text", "text": "Sorry, I received an empty response."}]}
     st.session_state.messages.append(analyst_message)
+
 
 def get_image_summary(image_file: str, stage: str) -> str:
     """Uses Snowflake Cortex to generate a summary for an image in a stage."""
@@ -211,8 +217,10 @@ def get_image_summary(image_file: str, stage: str) -> str:
                 return "No summary could be generated."
     except Exception as e:
         st.error(f"Error generating image summary: {e}")
-        st.info("This error can occur if the Cortex function is not enabled, the model name is incorrect, or the stage path is invalid.")
+        st.info(
+            "This error can occur if the Cortex function is not enabled, the model name is incorrect, or the stage path is invalid.")
         return "An error occurred during summary generation."
+
 
 def get_similarity_score(text1: str, text2: str) -> Optional[float]:
     """Calculates the AI_SIMILARITY score between two text inputs."""
@@ -233,6 +241,7 @@ def get_similarity_score(text1: str, text2: str) -> Optional[float]:
     except Exception as e:
         st.error(f"Error calculating similarity score: {e}")
         return None
+
 
 # --- UI Display Functions ---
 def display_sql_query(sql: str):
@@ -255,6 +264,7 @@ def display_sql_query(sql: str):
         with chart_tab:
             st.line_chart(df)
 
+
 def display_message(message: Dict, index: int):
     """Displays a single chat message, handling text, suggestions, and SQL."""
     for item in message["content"]:
@@ -266,6 +276,7 @@ def display_message(message: Dict, index: int):
                     process_user_input(suggestion)
         elif item["type"] == "sql":
             display_sql_query(item["statement"])
+
 
 def display_conversation():
     """Renders the entire conversation history."""
@@ -284,10 +295,12 @@ if "selected_claim" not in st.session_state:
 if "selected_semantic_model_path" not in st.session_state:
     st.session_state.selected_semantic_model_path = AVAILABLE_SEMANTIC_MODELS_PATHS[0]
 
+
 # 2. Define callback to reset chat when claim selection changes
 def on_claim_change():
     """Resets the chat message history when a new claim is selected."""
     st.session_state.messages = []
+
 
 # 3. Check if the last message was from the user, if so, get the analyst response
 if st.session_state.messages and st.session_state.messages[-1]["role"] == "user":
@@ -320,7 +333,7 @@ SELECT TO_VARCHAR(
         {'mode': 'OCR'})                     -- OCR Mode
     ) AS ocr_text;
         """, language="sql")
-        
+
         st.subheader("2. Unstructured Text Search: `Cortex Search Service`")
         st.markdown("""
         **Goal:** Perform fast, semantic searches across large volumes of text, such as all claim notes or state compliance guidelines.
@@ -340,10 +353,10 @@ SELECT SNOWFLAKE.CORTEX.SEARCH(
         """, language="sql")
 
     claim_numbers = get_claim_numbers()
-    
+
     selected_claim = st.selectbox(
-        "Select a Claim Number:", 
-        options=[""] + claim_numbers, 
+        "Select a Claim Number:",
+        options=[""] + claim_numbers,
         key="selected_claim",
         on_change=on_claim_change
     )
@@ -353,19 +366,19 @@ SELECT SNOWFLAKE.CORTEX.SEARCH(
         data = get_claim_details(selected_claim)
         st.text_area("Claim Details Summary", data["claim_details"], height=250, disabled=True)
         st.markdown("---")
-        
+
         col1, col2 = st.columns([3, 1])
         with col1:
-             st.selectbox(
+            st.selectbox(
                 "Select a predefined question to ask the Audit Agent:",
                 options=data["audit_questions"],
                 key="selected_question_text"
             )
         with col2:
-            st.markdown("<br>", unsafe_allow_html=True) # Align button vertically
+            st.markdown("<br>", unsafe_allow_html=True)  # Align button vertically
             if st.button("Ask Predefined Question", use_container_width=True):
                 process_user_input(st.session_state.selected_question_text)
-        
+
         st.markdown("---")
 
         # --- Integrated Chat Interface ---
@@ -388,7 +401,6 @@ SELECT SNOWFLAKE.CORTEX.SEARCH(
     else:
         st.info("Please select a claim number to begin the audit.")
 
-
 with tab2:
     st.header("Image Audit")
 
@@ -399,21 +411,21 @@ with tab2:
         **How it Works:** The `SNOWFLAKE.CORTEX.COMPLETE` function can analyze both text and images. By providing a prompt and a file from a stage, we can ask a large language model (LLM) to describe what it 'sees' in the image.
         """)
         st.code("""
--- This command asks a multimodal model to summarize an image file.
-SELECT SNOWFLAKE.CORTEX.COMPLETE(
-    'claude-3-sonnet',                               -- Model Name
-    'Summarize the key insights from this image...', -- User Prompt
-    TO_FILE('@CLAIM_IMAGES/damage_photo.jpg')        -- Image File from Stage
-);
-        """, language="sql")
+                -- This command asks a multimodal model to summarize an image file.
+                SELECT snowflake.cortex.complete(
+                               'claude-3-sonnet', -- Model Name
+                               'Summarize the key insights from this image...', -- User Prompt
+                               to_file('@CLAIM_IMAGES/damage_photo.jpg') -- Image File from Stage
+                       );
+                """, language="sql")
 
     image_files = list_images_in_stage(CLAIM_IMAGES_STAGE_NAME)
-    
+
     if not image_files:
         st.warning(f"No image files found in stage @{CLAIM_IMAGES_STAGE_NAME}.")
     else:
         selected_image = st.selectbox("Select an Image File:", options=[""] + image_files)
-        
+
         if selected_image and st.session_state.selected_claim:
             # Display the selected image from the stage
             image_bytes = get_image_from_stage(CLAIM_IMAGES_STAGE_NAME, selected_image)
@@ -423,12 +435,12 @@ SELECT SNOWFLAKE.CORTEX.COMPLETE(
                     caption=f"Displaying: {selected_image}",
                     use_container_width=True
                 )
-            
+
             # Button to generate the summary for the displayed image
             if st.button("Generate Image Summary & Similarity"):
                 # Get the image summary
                 image_summary = get_image_summary(selected_image, CLAIM_IMAGES_STAGE_NAME)
-                
+
                 # Get the loss description from the main claim details
                 claim_details = get_claim_details(st.session_state.selected_claim)
                 claim_description = claim_details.get("loss_description")
@@ -439,7 +451,7 @@ SELECT SNOWFLAKE.CORTEX.COMPLETE(
 
                 st.subheader("Claim Description:")
                 st.write(claim_description)
-                
+
                 # Calculate and display the similarity score
                 if claim_description and image_summary:
                     similarity_score = get_similarity_score(claim_description, image_summary)

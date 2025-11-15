@@ -47,3 +47,8 @@ tasks:
 #      - task: agent:create-agents-from-json-files
 #        vars:
 #          USER_PAT: $USER_PAT
+
+      - task: snow-cli:deploy-streamlit-app
+        vars:
+          STREAMLIT_APP_DIR: ./streamlit_app
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
