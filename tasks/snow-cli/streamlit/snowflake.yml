@@ -1,0 +1,14 @@
+definition_version: '2'
+entities:
+  ins_co_claims_audit_streamlit:
+    type: streamlit
+    identifier:
+      name: ins_co_claims_audit_streamlit
+      database: ins_co
+      schema: loss_claims
+    main_file: streamlit_app.py
+    query_warehouse: compute_wh
+    stage: ins_co.loss_claims.models
+    artifacts:
+      - streamlit_app.py
+      - environment.yml
