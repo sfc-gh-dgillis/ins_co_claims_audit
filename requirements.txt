@@ -1,0 +1,12 @@
+# Insurance Claims Audit - Python Dependencies
+
+# Streamlit application dependencies
+streamlit>=1.31.0
+pandas>=2.1.0
+
+# Snowflake Python libraries
+snowflake-snowpark-python>=1.11.0
+
+# Special Snowflake modules (_snowflake) are provided by the Snowflake
+# environment when running Streamlit in Snowflake (SiS) and should not
+# be installed locally.
