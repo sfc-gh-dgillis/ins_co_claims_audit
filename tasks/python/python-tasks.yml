@@ -1,0 +1,46 @@
+version: '3'
+
+tasks:
+
+  create-venv:
+    desc: Create Python virtual environment in .venv folder (only if it doesn't exist)
+    cmds:
+      - echo "Creating virtual environment in .venv/..."
+      - python3 -m venv .venv
+      - echo "✅ Virtual environment created"
+    status:
+      - test -d .venv
+    preconditions:
+      - sh: test -f requirements.txt
+        msg: "requirements.txt not found in project root"
+
+  describe-venv-operation:
+    desc: Show how to activate and deactivate the virtual environment
+    cmds:
+      - chmod +x ./tasks/python/cmd/describe-venv-ops.sh && ./tasks/python/cmd/describe-venv-ops.sh
+
+  install-packages:
+    desc: Install Python dependencies from requirements.txt
+    cmds:
+      - chmod +x ./tasks/python/cmd/install-packages.sh && ./tasks/python/cmd/install-packages.sh
+    sources:
+      - requirements.txt
+    generates:
+      - .venv/lib/python*/site-packages/*
+    preconditions:
+      - sh: test -d .venv
+        msg: "Virtual environment not found. Run 'task python:create-venv' first"
+
+  list-packages:
+    desc: List installed Python packages
+    cmds:
+      - .venv/bin/python3 -m pip list
+    preconditions:
+      - sh: test -d .venv
+        msg: "Virtual environment not found. Run 'task python:create-venv' first"
+
+  clean-venv:
+    desc: Remove virtual environment
+    cmds:
+      - rm -rf .venv
+      - echo "✅ Virtual environment removed"
