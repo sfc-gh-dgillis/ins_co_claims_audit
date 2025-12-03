@@ -41,3 +41,6 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+
+# Streamlit output directory
+tasks/snow-cli/streamlit/output
