@@ -8,7 +8,7 @@ entities:
       schema: loss_claims
     main_file: streamlit_app.py
     query_warehouse: compute_wh
-    stage: ins_co.loss_claims.models
+    stage: ins_co.loss_claims.streamlit_deploy_stage
     artifacts:
       - streamlit_app.py
       - environment.yml
