@@ -42,52 +42,37 @@ CREATE OR REPLACE FUNCTION INS_CO.LOSS_CLAIMS.PARSE_DOCUMENT_FROM_STAGE(p_file_n
   $$
 ;
 
-CREATE OR REPLACE FUNCTION INS_CO.LOSS_CLAIMS.GET_IMAGE_SUMMARY("IMAGE_FILE" VARCHAR, "STAGE_NAME" VARCHAR)
-RETURNS VARCHAR
-LANGUAGE SQL
-AS '
-    SELECT SNOWFLAKE.CORTEX.COMPLETE(
-        ''claude-3-5-sonnet'',
-        ''Summarize the key insights from the attached image in 100 words.'',
-        TO_FILE(''@'' || STAGE_NAME || ''/'' || IMAGE_FILE)
-    )
-';
+CREATE OR REPLACE FUNCTION INS_CO.LOSS_CLAIMS.GET_IMAGE_SUMMARY(p_file_name VARCHAR, p_stage_name VARCHAR DEFAULT '@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE')
+  RETURNS VARIANT
+  LANGUAGE SQL
+  AS
+  $$
+    SELECT AI_COMPLETE(
+                   'claude-3-5-sonnet',
+                   'Summarize the key insights from the attached image in 100 words.',
+                   to_file(p_stage_name, p_file_name)
+           )
+  $$
+;
 
-CREATE OR REPLACE PROCEDURE INS_CO.LOSS_CLAIMS.TRANSCRIBE_AUDIO_SIMPLE("FILE_NAME" VARCHAR, "STAGE_NAME" VARCHAR DEFAULT '@loss_evidence')
-RETURNS OBJECT
-LANGUAGE SQL
-EXECUTE AS OWNER
-AS '
-BEGIN
-    -- This approach avoids variable scoping issues by using a different pattern
-    RETURN (
-        WITH transcription_query AS (
-            SELECT 
-                :file_name as fn,
-                :stage_name as sn,
-                AI_TRANSCRIBE(
-                    TO_FILE(:stage_name, :file_name),
-                    PARSE_JSON(''{"timestamp_granularity": "speaker"}'')
-                ) as transcription_result
-        )
-        SELECT OBJECT_CONSTRUCT(
-            ''success'', TRUE,
-            ''file_name'', fn,
-            ''stage_name'', sn,
-            ''transcription'', transcription_result,
-            ''transcription_timestamp'', CURRENT_TIMESTAMP()
-        )
-        FROM transcription_query
-    );
-EXCEPTION
-    WHEN OTHER THEN
-        RETURN OBJECT_CONSTRUCT(
-            ''success'', FALSE,
-            ''file_name'', :file_name,
-            ''stage_name'', :stage_name,
-            ''error_code'', SQLCODE,
-            ''error_message'', SQLERRM,
-            ''transcription_timestamp'', CURRENT_TIMESTAMP()
-        );
-END;
-';
+CREATE OR REPLACE PROCEDURE INS_CO.LOSS_CLAIMS.TRANSCRIBE_AUDIO_SIMPLE(p_file_name VARCHAR, p_stage_name VARCHAR DEFAULT '@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE')
+  RETURNS OBJECT
+  LANGUAGE SQL
+  EXECUTE AS OWNER
+  AS
+  $$
+    WITH transcription_query AS (SELECT to_file(p_stage_name, p_file_name) AS target_file,
+                                        ai_transcribe(f => target_file,
+                                                      options => PARSE_JSON('{"timestamp_granularity": "speaker"}')
+                                        )                                                                    AS transcription_result)
+
+    SELECT OBJECT_CONSTRUCT(
+                   'success', TRUE,
+                   'file_name', fl_get_relative_path(target_file),
+                   'stage_name', fl_get_stage(target_file),
+                   'transcription', transcription_result,
+                   'transcription_timestamp', CURRENT_TIMESTAMP()
+           )
+    FROM transcription_query
+  $$
+;
