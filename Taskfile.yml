@@ -3,8 +3,10 @@ version: '3'
 includes:
   validate-prerequisites: ./tasks/validate-prerequisites/validate-prerequisite-tasks.yml
   snow-cli: ./tasks/snow-cli/snowcli-tasks.yml
-  agent: ./tasks/agent/agent-tasks.yml
   python: ./tasks/python/python-tasks.yml
+  agent:
+    taskfile: ./tasks/agent/create-agent/create-agent.yml
+    dir: ./tasks/agent/create-agent
 
 env:
   ENV_DIR: .env
@@ -62,3 +64,8 @@ tasks:
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
           DATABASE_NAME: $DATABASE_NAME
+
+  create-agent:
+    desc: Creates agent from create_agent.json file.
+    cmds:
+      - task: agent:create-agent
