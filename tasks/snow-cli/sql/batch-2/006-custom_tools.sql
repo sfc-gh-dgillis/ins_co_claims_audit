@@ -61,18 +61,24 @@ CREATE OR REPLACE PROCEDURE INS_CO.LOSS_CLAIMS.TRANSCRIBE_AUDIO_SIMPLE(p_file_na
   EXECUTE AS OWNER
   AS
   $$
-    WITH transcription_query AS (SELECT to_file(p_stage_name, p_file_name) AS target_file,
-                                        ai_transcribe(f => target_file,
-                                                      options => PARSE_JSON('{"timestamp_granularity": "speaker"}')
-                                        )                                                                    AS transcription_result)
+    DECLARE
+    v_obj OBJECT;
+    BEGIN
+      WITH transcription_query_cte AS (SELECT to_file(:p_stage_name, :p_file_name) AS target_file,
+                                              ai_transcribe(f => target_file,
+                                                            options => PARSE_JSON('{"timestamp_granularity": "speaker"}')
+                                              )                                  AS transcription_result)
 
-    SELECT OBJECT_CONSTRUCT(
-                   'success', TRUE,
-                   'file_name', fl_get_relative_path(target_file),
-                   'stage_name', fl_get_stage(target_file),
-                   'transcription', transcription_result,
-                   'transcription_timestamp', CURRENT_TIMESTAMP()
-           )
-    FROM transcription_query
+      SELECT OBJECT_CONSTRUCT(
+                     'success', TRUE,
+                     'file_name', fl_get_relative_path(target_file),
+                     'stage_name', fl_get_stage(target_file),
+                     'transcription', tq.transcription_result,
+                     'transcription_timestamp', CURRENT_TIMESTAMP()
+             ) into :v_obj
+      FROM transcription_query_cte tq;
+
+      RETURN v_obj;
+    END;
   $$
 ;
