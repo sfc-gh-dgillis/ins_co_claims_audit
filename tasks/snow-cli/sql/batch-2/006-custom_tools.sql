@@ -67,7 +67,7 @@ CREATE OR REPLACE PROCEDURE INS_CO.LOSS_CLAIMS.TRANSCRIBE_AUDIO_SIMPLE(p_file_na
       WITH transcription_query_cte AS (SELECT to_file(:p_stage_name, :p_file_name) AS target_file,
                                               ai_transcribe(f => target_file,
                                                             options => PARSE_JSON('{"timestamp_granularity": "speaker"}')
-                                              )                                  AS transcription_result)
+                                              )                                    AS transcription_result)
 
       SELECT OBJECT_CONSTRUCT(
                      'success', TRUE,
