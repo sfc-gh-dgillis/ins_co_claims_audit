@@ -43,23 +43,34 @@ mkdir -p .env
 
 ### 2. Configure Environment File
 
-Create a `.env/demo.env` file with the following variables:
+Create a `.env/demo.env` file based on the provided template. Copy and modify the following:
 
 ```bash
-# Snowflake Connection
-CLI_CONNECTION_NAME=your_connection_name
+# This is a template for the demo.env file used by the demo scripts.
+# Copy this file to demo.env and fill in the required values.
 
-# Database Configuration
-DATABASE_NAME=INS_CO
+# The Snowflake connection name configured in snow-cli for keypair authentication.
+CLI_CONNECTION_NAME=your_connection_name_here
+
+# All objects are created in this database and schema.
 DEMO_DATABASE_NAME=INS_CO
+DEMO_SCHEMA_NAME=INS_CO.LOSS_CLAIMS
 
-# File Upload Configuration
-FILE_UPLOAD_DIR=upload
+# The internal named stage used to upload files for the demo.
 INTERNAL_NAMED_STAGE=@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE
 
-# Streamlit Configuration
-STREAMLIT_APP_DIR=tasks/snow-cli/streamlit
+# The task which runs the file upload and streamlit app deploy runs from the snow-cli directory.
+# The upload and streamlit directories are relative to that.
+FILE_UPLOAD_DIR="../../upload"
+STREAMLIT_APP_DIR=streamlit
 ```
+
+**Important Notes:**
+- `CLI_CONNECTION_NAME`: Must match a connection configured in your Snowflake CLI
+- `DEMO_DATABASE_NAME`: The database where all objects will be created (e.g., `INS_CO`)
+- `DEMO_SCHEMA_NAME`: Fully qualified schema name in format `database.schema` (e.g., `INS_CO.LOSS_CLAIMS`)
+- `INTERNAL_NAMED_STAGE`: Fully qualified stage name with `@` prefix (e.g., `@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE`)
+- `FILE_UPLOAD_DIR` and `STREAMLIT_APP_DIR`: These are relative paths from the `tasks/snow-cli` directory
 
 **Note:** You can use a custom environment file by naming it differently (e.g., `custom.env`) and specifying it when running tasks:
 
@@ -194,7 +205,7 @@ To completely remove the demo and all created objects:
 task demo-down
 ```
 
-This will drop the `INS_CO` database and all its contents.
+This will drop the database specified in `DEMO_DATABASE_NAME` and all its contents (schemas, tables, stages, functions, agents, etc.).
 
 ## Advanced Usage
 
@@ -204,20 +215,24 @@ You can run specific parts of the deployment individually:
 
 #### Create Database and Tables Only
 ```bash
-task snow-cli:sort-and-process-sql-folder SQL_SORT_PROCESS_DIR=sql/batch-1 CLI_CONNECTION_NAME=your_connection
+task snow-cli:sort-and-process-sql-folder \
+  SQL_SORT_PROCESS_DIR=sql/batch-1 \
+  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
 ```
 
 #### Upload Files to Stage
 ```bash
 task snow-cli:upload-files-to-internal-named-stage \
-  FILE_UPLOAD_DIR=upload \
-  CLI_CONNECTION_NAME=your_connection \
-  INTERNAL_NAMED_STAGE=@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE
+  FILE_UPLOAD_DIR=$FILE_UPLOAD_DIR \
+  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME \
+  INTERNAL_NAMED_STAGE=$INTERNAL_NAMED_STAGE
 ```
 
 #### Process Additional SQL Files
 ```bash
-task snow-cli:sort-and-process-sql-folder SQL_SORT_PROCESS_DIR=sql/batch-2 CLI_CONNECTION_NAME=your_connection
+task snow-cli:sort-and-process-sql-folder \
+  SQL_SORT_PROCESS_DIR=sql/batch-2 \
+  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
 ```
 
 #### Create Agent Only
@@ -228,8 +243,8 @@ task snow-cli:create-agent
 #### Deploy Streamlit App Only
 ```bash
 task snow-cli:deploy-streamlit-app \
-  STREAMLIT_APP_DIR=tasks/snow-cli/streamlit \
-  CLI_CONNECTION_NAME=your_connection
+  STREAMLIT_APP_DIR=$STREAMLIT_APP_DIR \
+  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
 ```
 
 ### Customizing the Agent
