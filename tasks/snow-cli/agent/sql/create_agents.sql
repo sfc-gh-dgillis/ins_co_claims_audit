@@ -1,11 +1,9 @@
+CREATE OR REPLACE AGENT INS_CO.LOSS_CLAIMS.CLAIMS_AUDIT_AGENT
+  COMMENT = 'This agent does a lot. It can analyze insurance claims data, search guidelines and notes, transcribe calls, summarize images, parse documents, classify documents, and redact email PII.'
+  PROFILE = '{"display_name":"Claim Audit Agent"}'
+  FROM SPECIFICATION
+  $$
 {
-  "database_name": "SNOWFLAKE_INTELLIGENCE",
-  "schema_name": "AGENTS",
-  "name": "CLAIMS_AUDIT_AGENT",
-  "comment": "This agent does a lot. It can analyze insurance claims data, search guidelines and notes, transcribe calls, summarize images, parse documents, classify documents, and redact email PII.",
-  "profile": {
-    "display_name": "Claim Audit Agent"
-  },
   "models": {
     "orchestration": "auto"
   },
@@ -62,15 +60,13 @@
     {
       "tool_spec": {
         "type": "cortex_search",
-        "name": "SEARCH_GUIDELINES",
-        "description": ""
+        "name": "SEARCH_GUIDELINES"
       }
     },
     {
       "tool_spec": {
         "type": "cortex_search",
-        "name": "SEARCH_CLAIM_NOTES",
-        "description": ""
+        "name": "SEARCH_CLAIM_NOTES"
       }
     },
     {
@@ -110,8 +106,8 @@
               "type": "string"
             },
             "p_stage_name": {
-              "description": "default the stage to INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE",
-              "type": "string"
+              "type": "string",
+              "description": "default the stage to INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE"
             }
           },
           "required": [
@@ -133,8 +129,8 @@
               "type": "string"
             },
             "p_stage_name": {
-              "description": "default the stage to INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE",
-              "type": "string"
+              "type": "string",
+              "description": "default the stage to INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE"
             }
           },
           "required": [
@@ -165,68 +161,57 @@
   ],
   "tool_resources": {
     "CLASSIFY_FUNCTION": {
+      "type": "function",
       "execution_environment": {
-        "query_timeout": 30,
         "type": "warehouse",
-        "warehouse": ""
+        "query_timeout": 30
       },
-      "identifier": "INS_CO.LOSS_CLAIMS.CLASSIFY_DOCUMENT",
-      "name": "CLASSIFY_DOCUMENT(VARCHAR, DEFAULT VARCHAR)",
-      "type": "function"
+      "identifier": "INS_CO.LOSS_CLAIMS.CLASSIFY_DOCUMENT"
     },
     "Image_summary": {
+      "type": "function",
       "execution_environment": {
-        "query_timeout": 60,
         "type": "warehouse",
-        "warehouse": ""
+        "query_timeout": 60
       },
-      "identifier": "INS_CO.LOSS_CLAIMS.GET_IMAGE_SUMMARY",
-      "name": "GET_IMAGE_SUMMARY(VARCHAR, VARCHAR)",
-      "type": "function"
+      "identifier": "INS_CO.LOSS_CLAIMS.GET_IMAGE_SUMMARY"
     },
     "Parse_document": {
+      "type": "function",
       "execution_environment": {
-        "query_timeout": 30,
         "type": "warehouse",
-        "warehouse": ""
+        "query_timeout": 30
       },
-      "identifier": "INS_CO.LOSS_CLAIMS.PARSE_DOCUMENT_FROM_STAGE",
-      "name": "PARSE_DOCUMENT_FROM_STAGE(VARCHAR)",
-      "type": "function"
+      "identifier": "INS_CO.LOSS_CLAIMS.PARSE_DOCUMENT_FROM_STAGE"
     },
     "REDACT_EMAIL": {
+      "type": "procedure",
       "execution_environment": {
-        "query_timeout": 180,
         "type": "warehouse",
-        "warehouse": ""
+        "query_timeout": 180
       },
-      "identifier": "INS_CO.LOSS_CLAIMS.REDACT_CLAIM_EMAIL_PII",
-      "name": "REDACT_CLAIM_EMAIL_PII(VARCHAR)",
-      "type": "procedure"
+      "identifier": "INS_CO.LOSS_CLAIMS.REDACT_CLAIM_EMAIL_PII"
     },
     "SEARCH_CLAIM_NOTES": {
-      "max_results": 4,
       "search_service": "INS_CO.LOSS_CLAIMS.INS_CO_CLAIM_NOTES"
     },
     "SEARCH_GUIDELINES": {
-      "max_results": 4,
       "search_service": "INS_CO.LOSS_CLAIMS.INS_CO_GUIDELINES"
     },
     "TEXT2SQL": {
+      "semantic_view": "INS_CO.LOSS_CLAIMS.CA_INS_CO",
       "execution_environment": {
         "type": "warehouse"
-      },
-      "semantic_view": "INS_CO.LOSS_CLAIMS.CA_INS_CO"
+      }
     },
     "TRANSCRIBE_CALLS": {
+      "type": "procedure",
       "execution_environment": {
-        "query_timeout": 60,
         "type": "warehouse",
-        "warehouse": ""
+        "query_timeout": 60
       },
-      "identifier": "INS_CO.LOSS_CLAIMS.TRANSCRIBE_AUDIO_SIMPLE",
-      "name": "TRANSCRIBE_AUDIO_SIMPLE(VARCHAR, DEFAULT VARCHAR)",
-      "type": "procedure"
+      "identifier": "INS_CO.LOSS_CLAIMS.TRANSCRIBE_AUDIO_SIMPLE"
     }
   }
 }
+  $$;

@@ -5,12 +5,12 @@ tasks:
   sort-and-process-sql-folder:
     desc: Sorts and processes all SQL files in the given directory. Sorts and executes SQL files with numeric prefixes (e.g., 001-schema.sql)
     cmds:
-      - python3 tasks/snow-cli/pyutil/snowclisp/snowclisp.py "{{.SQL_SORT_PROCESS_DIR}}" "{{.CLI_CONNECTION_NAME}}"
+      - python3 pyutil/snowclisp/snowclisp.py "{{.SQL_SORT_PROCESS_DIR}}" "{{.CLI_CONNECTION_NAME}}"
 
   upload-files-to-internal-named-stage:
     desc: Uploads all files from the given directory to a Snowflake Internal stage using the Snowflake CLI and PUT command.
     cmds:
-      - python3 ./tasks/snow-cli/pyutil/snowcliput/snowcliput.py "{{.FILE_UPLOAD_DIR}}" "{{.CLI_CONNECTION_NAME}}" "{{.INTERNAL_NAMED_STAGE}}"
+      - python3 pyutil/snowcliput/snowcliput.py "{{.FILE_UPLOAD_DIR}}" "{{.CLI_CONNECTION_NAME}}" "{{.INTERNAL_NAMED_STAGE}}"
 
   deploy-streamlit-app:
     desc: Deploys a Streamlit app to Snowflake using the Snowflake CLI.
@@ -21,3 +21,18 @@ tasks:
     desc: Drops the specified Snowflake database if it exists using the Snowflake CLI.
     cmds:
       - snow sql --connection "{{.CLI_CONNECTION_NAME}}" --query "DROP DATABASE IF EXISTS {{.DEMO_DATABASE_NAME}};"
+
+  desc-agent:
+    desc: Executes describe agent sql and sends output to a file.
+    cmds:
+      - snow sql -f agent/sql/desc-agent.sql --format=JSON_EXT > agent/json/describe_agent_output.json
+
+  generate-create-agent-sql-from-desc-agent-output:
+    desc: Creates create_agents.sql file from describe_agent_output.json.
+    cmds:
+      - python3 pyutil/genagentsql/genagentsql.py -i agent/json/describe_agent_output.json -o agent/sql/create_agents.sql
+
+  create-agent:
+    desc: Creates agents from create_agents.json file.
+    cmds:
+      - snow sql -f agent/sql/create_agents.sql
