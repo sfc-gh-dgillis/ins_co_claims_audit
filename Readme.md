@@ -56,6 +56,9 @@ CLI_CONNECTION_NAME=your_connection_name_here
 DEMO_DATABASE_NAME=INS_CO
 DEMO_SCHEMA_NAME=INS_CO.LOSS_CLAIMS
 
+# Database name used for teardown (should match DEMO_DATABASE_NAME)
+DATABASE_NAME=INS_CO
+
 # The internal named stage used to upload files for the demo.
 INTERNAL_NAMED_STAGE=@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE
 
@@ -69,6 +72,7 @@ STREAMLIT_APP_DIR=streamlit
 - `CLI_CONNECTION_NAME`: Must match a connection configured in your Snowflake CLI
 - `DEMO_DATABASE_NAME`: The database where all objects will be created (e.g., `INS_CO`)
 - `DEMO_SCHEMA_NAME`: Fully qualified schema name in format `database.schema` (e.g., `INS_CO.LOSS_CLAIMS`)
+- `DATABASE_NAME`: Used by the teardown task (should match `DEMO_DATABASE_NAME`)
 - `INTERNAL_NAMED_STAGE`: Fully qualified stage name with `@` prefix (e.g., `@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE`)
 - `FILE_UPLOAD_DIR` and `STREAMLIT_APP_DIR`: These are relative paths from the `tasks/snow-cli` directory
 
@@ -96,14 +100,37 @@ Run the following command to deploy the entire demo:
 task demo-up
 ```
 
-This command will:
+This command executes the following steps in sequence:
 
-1. **Create the Agent** - Deploy the Claims Audit Agent with integrated tools:
+1. **Validate Prerequisites** - Verify that Snowflake CLI is properly installed and configured
+
+2. **Create Database Schema and Tables (Batch 1)** - Execute SQL files in `sql/batch-1/`:
+   - Create the `INS_CO` database
+   - Create the `LOSS_CLAIMS` schema
+   - Create all required tables (CLAIMS, CLAIM_LINES, FINANCIAL_TRANSACTIONS, AUTHORIZATION, INVOICES, etc.)
+   - Create chunk tables for notes and guidelines
+
+3. **Upload Sample Files to Stage** - Upload all files from the `upload/` directory to the `LOSS_EVIDENCE` stage:
+   - Claim evidence images (JPEG files)
+   - Claim notes (PDF)
+   - Guidelines (DOCX)
+   - Invoices (PNG)
+   - Call recordings (WAV)
+
+4. **Create Cortex Services and Custom Tools (Batch 2)** - Execute SQL files in `sql/batch-2/`:
+   - Refresh and populate the stage
+   - Insert sample data into tables (DML operations)
+   - Create Cortex Search services for claim notes and guidelines
+   - Create custom functions for document processing, image analysis, transcription, etc.
+   - Create semantic views for Cortex Analyst
+   - Create MCP server configuration
+
+5. **Create the Agent** - Deploy the Claims Audit Agent with integrated tools:
    - Cortex Analyst for SQL-based queries
    - Cortex Search for guidelines and notes
    - Custom tools for document parsing, image analysis, audio transcription, document classification, and PII redaction
 
-2. **Deploy Streamlit App** - Deploy the web-based claims audit interface to Snowflake
+6. **Deploy Streamlit App** - Deploy the web-based claims audit interface to Snowflake
 
 ### What Gets Created
 
@@ -205,7 +232,7 @@ To completely remove the demo and all created objects:
 task demo-down
 ```
 
-This will drop the database specified in `DEMO_DATABASE_NAME` and all its contents (schemas, tables, stages, functions, agents, etc.).
+This will drop the database specified in `DATABASE_NAME` (configured in your `.env/demo.env` file) and all its contents (schemas, tables, stages, functions, agents, etc.).
 
 ## Advanced Usage
 
