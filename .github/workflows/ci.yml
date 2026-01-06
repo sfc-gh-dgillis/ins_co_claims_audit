@@ -27,14 +27,15 @@ jobs:
 
       - name: 'Create .env file'
         run: |
-          touch .env
-          echo CLI_CONNECTION_NAME=ga_dev_keypair_auth >> .env
-          echo DEMO_DATABASE_NAME=ins_co >> .env
-          echo DEMO_SCHEMA_NAME=ins_co.loss_claims >> .env
-          echo INTERNAL_NAMED_STAGE=@ins_co.loss_claims.loss_evidence >> .env
-          echo FILE_UPLOAD_DIR="../../upload" >> .env
-          echo STREAMLIT_APP_DIR=streamlit >> .env
-          cat .env
+          cd .env
+          touch demo.env
+          echo CLI_CONNECTION_NAME=ga_dev_keypair_auth >> demo.env
+          echo DEMO_DATABASE_NAME=ins_co >> demo.env
+          echo DEMO_SCHEMA_NAME=ins_co.loss_claims >> demo.env
+          echo INTERNAL_NAMED_STAGE=@ins_co.loss_claims.loss_evidence >> demo.env
+          echo FILE_UPLOAD_DIR="../../upload" >> demo.env
+          echo STREAMLIT_APP_DIR=streamlit >> demo.env
+          cat demo.env
 
       # Set up Taskfile CLI
       - name: Setup Taskfile CLI
