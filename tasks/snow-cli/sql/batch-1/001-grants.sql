@@ -67,6 +67,11 @@ GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE ins_co_claims_rw;
 -- GRANT USAGE ON FUNCTION my_database.my_schema.my_udf(NUMBER) TO ROLE my_role;
 
 -- -----------------------------------------------------------------------
+-- Streamlit Grants
+-- -----------------------------------------------------------------------
+GRANT CREATE STREAMLIT ON SCHEMA ins_co.loss_claims TO ROLE ins_co_claims_rw;
+
+-- -----------------------------------------------------------------------
 -- ROLE to ROLE Grants
 -- -----------------------------------------------------------------------
 -- grant access roles to functional roles
