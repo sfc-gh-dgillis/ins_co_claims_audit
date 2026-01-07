@@ -1,3 +1,0 @@
-CREATE DATABASE IF NOT EXISTS ins_co;
-
-CREATE SCHEMA IF NOT EXISTS ins_co.loss_claims;

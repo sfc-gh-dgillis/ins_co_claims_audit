@@ -5,7 +5,7 @@ CREATE OR REPLACE CORTEX SEARCH SERVICE ins_co_claim_notes
   ON chunk
   -- NOTE_CONTENT
   -- ATTRIBUTES claim_no, note_date, note_id
-  WAREHOUSE = compute_wh
+  WAREHOUSE = demo_s_wh
   TARGET_LAG = '1 hour'
   EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
 AS (
@@ -17,7 +17,7 @@ AS (
 CREATE OR REPLACE CORTEX SEARCH SERVICE ins_co_guidelines
   ON chunk
   -- ATTRIBUTES claim_no, note_date, note_id
-  WAREHOUSE = compute_wh
+  WAREHOUSE = demo_s_wh
   TARGET_LAG = '1 hour'
   EMBEDDING_MODEL = 'snowflake-arctic-embed-l-v2.0'
 AS (

@@ -31,6 +31,40 @@ You can validate that Snowflake CLI is installed correctly:
 task validate-prerequisites:snowcli
 ```
 
+## Warehouse, Role, and Privilege
+
+Manually run the sql scripts found at `tasks/snow-cli/sql/batch-0` to create a dedicated warehouse, roles, database and schema. The user you use to run these scripts must have the SYSADMIN, USERADMIN and SECURITYADMIN roles. If you have a Snowflake CLI connection configured that has the SYSADMIN and USERADMIN roles, you can run the scripts by running the following command:
+
+```bash
+task demo-init-1
+```
+
+## User Initialization
+
+The demo requires two users to be created in Snowflake. The first user is the user that will be used to run the demo using Taskfile and the Snowflake CLI. The second user is the user that will be used to run the demo in Github Actions (still using Taskfile). Both users should be setup to use rsa-keypair authentication. Setting up the users is outside the scope of this guide, but the following steps will help you get started:
+
+### User 1 - ga_mock
+
+For the first user (the user that will be used to run the demo using Taskfile and the Snowflake CLI):
+
+1. Create a service user in Snowflake named `ga_mock`. This user will be given the same role as the user that will be used to run the demo in Github Actions.
+2. Generate an RSA keypair for the user.
+3. Set the public key for the user in Snowflake.
+4. Create a new connection in the Snowflake CLI for the user.
+5. Test the connection to ensure it is working.
+
+### User 2 - ga_dev
+
+For the second user (the user that will be used to run the demo in Github Actions):
+
+1. Create a service user in Snowflake named `ga_dev`. This user will be the actual user that will be used to run the demo in Github Actions.
+2. Generate an RSA keypair for the user.
+3. Set the public key for the user in Snowflake.
+4. Set the private key for the user in the Github Actions secrets as `SNOWFLAKE_PRIVATE_KEY_RAW`.
+5. Create a new connection in the Snowflake CLI for the user.
+6. Test the connection to ensure it is working.
+
+
 ## Environment Setup
 
 ### 1. Create Environment Configuration

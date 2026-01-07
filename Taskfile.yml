@@ -20,6 +20,31 @@ tasks:
       - task: python:create-venv
       - task: python:install-packages
 
+  demo-init-1:
+    desc: |
+      Usage: `task demo-init` will initialize prerequisite objects needed for the demo. In this case, creating the warehouse, roles, database and schema. This task must be run by a user with the SYSADMIN and USERADMIN roles.
+    cmds:
+      - task: validate-prerequisites:snowcli
+        silent: true
+
+      - task: snow-cli:sort-and-process-sql-folder
+        vars:
+          SQL_SORT_PROCESS_DIR: sql/batch-0
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+  demo-init-2:
+    desc: |
+      Usage: `task demo-init-2` will issue the grants 
+    cmds:
+      - task: validate-prerequisites:snowcli
+        silent: true
+
+      - task: snow-cli:sort-and-process-sql-folder
+        vars:
+          SQL_SORT_PROCESS_DIR: sql/batch-1
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+
   demo-up:
     desc: |
       Usage: `task demo-up` if using the default demo.env file. Use `DOTENV_FILENAME=custom.env task demo-up`
@@ -31,7 +56,7 @@ tasks:
 
       - task: snow-cli:sort-and-process-sql-folder
         vars:
-          SQL_SORT_PROCESS_DIR: sql/batch-1
+          SQL_SORT_PROCESS_DIR: sql/batch-2
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
       - task: snow-cli:upload-files-to-internal-named-stage
@@ -42,7 +67,7 @@ tasks:
 
       - task: snow-cli:sort-and-process-sql-folder
         vars:
-          SQL_SORT_PROCESS_DIR: sql/batch-2
+          SQL_SORT_PROCESS_DIR: sql/batch-3
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
       - task: snow-cli:create-agent
