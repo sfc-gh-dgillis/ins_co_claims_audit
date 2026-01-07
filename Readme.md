@@ -68,6 +68,24 @@ For the second user (the user that will be used to run the demo in Github Action
 5. Create a new connection in the Snowflake CLI for the user.
 6. Test the connection to ensure it is working.
 
+Set the network policy for the `ga_dev` user to only allow access from the Github Actions IP addresses by running the following SQL commands:
+
+```sql
+SHOW NETWORK RULES IN SNOWFLAKE.NETWORK_SECURITY;
+
+SELECT *
+  FROM SNOWFLAKE.ACCOUNT_USAGE.NETWORK_RULES
+  WHERE DATABASE = 'SNOWFLAKE' 
+    AND SCHEMA = 'NETWORK_SECURITY'
+    AND NAME = 'GITHUBACTIONS_GLOBAL';
+
+CREATE OR REPLACE NETWORK POLICY github_actions_ingress ALLOWED_NETWORK_RULE_LIST = (
+  'SNOWFLAKE.NETWORK_SECURITY.GITHUBACTIONS_GLOBAL'
+);
+
+ALTER USER ga_dev SET NETWORK_POLICY = github_actions_ingress;
+```
+
 ## Step 3: Grants Initialization
 
 Run the following command to issue the grants to the users:
