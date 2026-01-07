@@ -71,6 +71,8 @@ tasks:
 #          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
       - task: snow-cli:create-agent
+        vars:
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
 #      - task: snow-cli:deploy-streamlit-app
 #        vars:

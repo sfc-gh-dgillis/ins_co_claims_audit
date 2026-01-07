@@ -25,7 +25,7 @@ tasks:
   desc-agent:
     desc: Executes describe agent sql and sends output to a file.
     cmds:
-      - snow sql -f agent/sql/desc-agent.sql --format=JSON_EXT > agent/json/describe_agent_output.json
+      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/sql/desc-agent.sql --format=JSON_EXT > agent/json/describe_agent_output.json
 
   generate-create-agent-sql-from-desc-agent-output:
     desc: Creates create_agents.sql file from describe_agent_output.json.
@@ -35,4 +35,4 @@ tasks:
   create-agent:
     desc: Creates agents from create_agents.json file.
     cmds:
-      - snow sql -f agent/sql/create_agents.sql
+      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/sql/create_agents.sql
