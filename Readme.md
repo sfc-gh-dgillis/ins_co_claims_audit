@@ -4,7 +4,7 @@ This guide provides step-by-step instructions to deploy the Insurance Claims Aud
 
 ## Overview
 
-This demo showcases a comprehensive insurance claims audit system built on Snowflake, featuring:
+This demo showcases an insurance claims audit system built on Snowflake, featuring:
 
 - **Snowflake Cortex Analyst** for natural language queries on claims data
 - **Cortex Search** for searching guidelines and claim notes
@@ -12,7 +12,7 @@ This demo showcases a comprehensive insurance claims audit system built on Snowf
 - **Cortex Agents** for intelligent claim analysis and audit workflows
 - **Streamlit in Snowflake** for the web-based user interface
 
-The system combines structured claims data with unstructured data from claim notes, state insurance guidelines, invoices, images, and call transcriptions to provide comprehensive claim auditing capabilities.
+The system combines structured claims data with unstructured data from claim notes, state insurance guidelines, invoices, images, and call transcriptions to provide claims auditing capabilities.
 
 ## Prerequisites
 
@@ -31,15 +31,19 @@ You can validate that Snowflake CLI is installed correctly:
 task validate-prerequisites:snowcli
 ```
 
-## Warehouse, Role, and Privilege
+## Step 1: Warehouse, Role, and Privilege Initialization
 
 Manually run the sql scripts found at `tasks/snow-cli/sql/batch-0` to create a dedicated warehouse, roles, database and schema. The user you use to run these scripts must have the SYSADMIN, USERADMIN and SECURITYADMIN roles. If you have a Snowflake CLI connection configured that has the SYSADMIN and USERADMIN roles, you can run the scripts by running the following command:
 
 ```bash
-task demo-init-1
+DOTENV_FILENAME=demo_init.env task demo-init-1
 ```
 
-## User Initialization
+> Note: The `demo_init.env_template` file is a template for the environment variables used by the init tasks for the demo. It is located in the `.env` directory.
+> You can copy it to `demo_init.env` and fill in the required values.
+> The `CLI_CONNECTION_NAME` must match a connection configured in your Snowflake CLI that has the SYSADMIN and USERADMIN roles.
+
+## Step 2: User Initialization
 
 The demo requires two users to be created in Snowflake. The first user is the user that will be used to run the demo using Taskfile and the Snowflake CLI. The second user is the user that will be used to run the demo in Github Actions (still using Taskfile). Both users should be setup to use rsa-keypair authentication. Setting up the users is outside the scope of this guide, but the following steps will help you get started:
 
@@ -64,6 +68,17 @@ For the second user (the user that will be used to run the demo in Github Action
 5. Create a new connection in the Snowflake CLI for the user.
 6. Test the connection to ensure it is working.
 
+## Step 3: Grants Initialization
+
+Run the following command to issue the grants to the users:
+
+```bash
+DOTENV_FILENAME=demo_init.env task demo-init-2
+```
+
+> Note: The `demo_init.env` file is a template for the environment variables used by the init tasks for the demo. It is located in the `.env` directory.
+> You can copy it to `demo_init.env` and fill in the required values.
+> The `CLI_CONNECTION_NAME` must match a connection configured in your Snowflake CLI that has the SYSADMIN and USERADMIN roles.
 
 ## Environment Setup
 
