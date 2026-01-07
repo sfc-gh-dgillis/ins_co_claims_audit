@@ -3,4 +3,4 @@ default_connection_name = "ga_dev_keypair_auth"
 [connections.ga_dev_keypair_auth]
 authenticator = "SNOWFLAKE_JWT"
 user = "ga_dev"
-role = "github_action_dev"
+role = "ins_co_ga_dev"
