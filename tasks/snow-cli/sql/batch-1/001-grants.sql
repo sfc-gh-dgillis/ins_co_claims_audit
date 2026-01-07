@@ -49,6 +49,7 @@ GRANT CREATE PROCEDURE ON SCHEMA ins_co.loss_claims TO ROLE ins_co_claims_rw;
 GRANT CREATE CORTEX SEARCH SERVICE ON SCHEMA ins_co.loss_claims TO ROLE ins_co_claims_rw;
 GRANT CREATE SEMANTIC VIEW ON SCHEMA ins_co.loss_claims TO ROLE ins_co_claims_rw;
 GRANT CREATE MCP SERVER ON SCHEMA ins_co.loss_claims TO ROLE ins_co_claims_rw;
+GRANT CREATE AGENT ON SCHEMA ins_co.loss_claims TO ROLE ins_co_claims_rw;
 
 -- Grant Cortex database role
 GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE ins_co_claims_rw;
