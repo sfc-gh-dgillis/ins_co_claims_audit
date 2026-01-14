@@ -14,6 +14,43 @@ This demo showcases an insurance claims audit system built on Snowflake, featuri
 
 The system combines structured claims data with unstructured data from claim notes, state insurance guidelines, invoices, images, and call transcriptions to provide claims auditing capabilities.
 
+## Personas
+
+This demo is designed for two distinct personas:
+
+### Admin Persona
+
+**Role:** Platform Administrator / Database Administrator
+
+**Responsibilities:**
+
+- Initial Snowflake environment setup (warehouses, roles, privileges)
+- Database and schema creation
+- Grant management and security configuration
+- Table structure creation and data loading
+- Stage creation and file uploads
+- Cortex Search services configuration
+- Custom functions and procedures deployment
+- Infrastructure and security setup
+
+**Handles:** Batch-0 (infrastructure), Batch-1 (grants), and Batch-2 (schema objects) SQL deployments
+
+### AI Engineer Persona
+
+**Role:** Application Developer / AI/ML Engineer
+
+**Responsibilities:**
+
+- Data population and transformation (Batch-3)
+- Cortex AI services configuration
+- Semantic model development
+- Agent configuration and deployment
+- Streamlit application development and deployment
+- Testing and iterating on agent behavior
+- Application-level customizations
+
+**Handles:** Batch-3 SQL deployments (data & AI services), Agent creation, and Streamlit deployment
+
 ## Prerequisites
 
 Before running the demo, ensure you have:
@@ -31,51 +68,181 @@ You can validate that Snowflake CLI is installed correctly:
 task validate-prerequisites:snowcli
 ```
 
-## Step 1: Warehouse, Role, and Privilege Initialization
+## Admin Setup (One-Time Initialization)
 
-Manually run the sql scripts found at `tasks/snow-cli/sql/batch-0` to create a dedicated warehouse, roles, database and schema. The user you use to run these scripts must have the SYSADMIN, USERADMIN and SECURITYADMIN roles. If you have a Snowflake CLI connection configured that has the SYSADMIN and USERADMIN roles, you can run the scripts by running the following command:
+The following steps must be performed by the **Admin Persona** with elevated Snowflake privileges. These are one-time setup steps that create the infrastructure and security foundation for the demo.
+
+### Step 1: Infrastructure Initialization (Batch-0)
+
+**Persona:** Admin (requires SYSADMIN and USERADMIN roles)
+
+This step creates the foundational Snowflake objects: warehouses, roles, database, and schema.
+
+**Prerequisites:**
+
+- A Snowflake user with SYSADMIN and USERADMIN roles
+- A Snowflake CLI connection configured for this user
+
+**Create the demo_init.env file:**
+
+Create a `.env/demo_init.env` file for the initialization tasks:
 
 ```bash
-DOTENV_FILENAME=demo_init.env task demo-init-1
+# The Snowflake connection name configured in snow-cli for keypair authentication.
+CLI_CONNECTION_NAME=your_admin_connection_name_here
+DEMO_DATABASE_NAME=ins_co
 ```
 
-> Note: The `demo_init.env_template` file is a template for the environment variables used by the init tasks for the demo. It is located in the `.env` directory.
-> You can copy it to `demo_init.env` and fill in the required values.
-> The `CLI_CONNECTION_NAME` must match a connection configured in your Snowflake CLI that has the SYSADMIN and USERADMIN roles.
+**Run the infrastructure initialization:**
 
-## Step 2: User Initialization
+```bash
+$ DOTENV_FILENAME=demo_init.env task demo-init-1
+Snowflake CLI (snow) is installed.
+task: [snow-cli:sort-and-process-sql-folder] python3 pyutil/snowclisp/snowclisp.py "sql/batch-0" "$CLI_CONNECTION_NAME"
+Scanning directory: sql/batch-0                                                                                                                                                                              
 
-The demo requires two users to be created in Snowflake. The first user is the user that will be used to run the demo using Taskfile and the Snowflake CLI. The second user is the user that will be used to run the demo in Github Actions (still using Taskfile). Both users should be setup to use rsa-keypair authentication. Setting up the users is outside the scope of this guide, but the following steps will help you get started:
+Found 3 SQL file(s) with numeric prefix:
+  1. [001] 001-create_warehouses.sql
+  2. [002] 002-init_roles.sql
+  3. [003] 003-db_schema.sql
 
-### User 1 - ga_mock
+Using Snowflake connection: your_admin_connection_name_here
 
-For the first user (the user that will be used to run the demo using Taskfile and the Snowflake CLI):
+============================================================
+Executing 3 SQL file(s) in order:
+  1. 001-create_warehouses.sql
+  2. 002-init_roles.sql
+  3. 003-db_schema.sql
+============================================================
+Running command:
+  snow sql -c your_admin_connection_name_here \
+    -f sql/batch-0/001-create_warehouses.sql \
+    -f sql/batch-0/002-init_roles.sql \
+    -f sql/batch-0/003-db_schema.sql \
 
-1. Create a service user in Snowflake named `ga_mock`. This user will be given the same role as the user that will be used to run the demo in Github Actions.
-2. Generate an RSA keypair for the user.
-3. Set the public key for the user in Snowflake.
-4. Create a new connection in the Snowflake CLI for the user.
-5. Test the connection to ensure it is working.
+USE ROLE sysadmin;
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+CREATE OR REPLACE WAREHOUSE demo_s_wh
+    WITH WAREHOUSE_SIZE = SMALL
+    INITIALLY_SUSPENDED = TRUE;
++-------------------------------------------+
+| status                                    |
+|-------------------------------------------|
+| Warehouse DEMO_S_WH successfully created. |
++-------------------------------------------+
+...
 
-### User 2 - ga_dev
+============================================================
+✓ Successfully executed all 3 SQL file(s)
+============================================================
+```
 
-For the second user (the user that will be used to run the demo in Github Actions):
+This executes SQL files in `sql/batch-0/`:
 
-1. Create a service user in Snowflake named `ga_dev`. This user will be the actual user that will be used to run the demo in Github Actions.
-2. Generate an RSA keypair for the user.
-3. Set the public key for the user in Snowflake.
-4. Set the private key for the user in the Github Actions secrets as `SNOWFLAKE_PRIVATE_KEY_RAW`.
-5. Create a new connection in the Snowflake CLI for the user.
-6. Test the connection to ensure it is working.
+- Creates the `INS_CO_WH` warehouse
+- Creates roles: `INS_CO_ADMIN` and `INS_CO_USER`
+- Creates the `INS_CO` database
+- Creates the `LOSS_CLAIMS` schema
 
-Set the network policy for the `ga_dev` user to only allow access from the Github Actions IP addresses by running the following SQL commands:
+### Step 2: Grant Configuration (Batch-1)
+
+**Persona:** Admin (requires SYSADMIN and USERADMIN roles)
+
+This step configures all necessary grants and permissions for the demo users and roles.
+
+**Run the grants configuration:**
+
+```bash
+$ DOTENV_FILENAME=demo_init.env task demo-init-2
+Snowflake CLI (snow) is installed.
+task: [snow-cli:sort-and-process-sql-folder] python3 pyutil/snowclisp/snowclisp.py "sql/batch-1" "$CLI_CONNECTION_NAME"
+Scanning directory: sql/batch-1
+
+Found 3 SQL file(s) with numeric prefix:
+  1. [001] 001-grants.sql
+  2. [002] 002-grants-cortex-ai.sql
+  3. [003] 003-grants_streamlit.sql
+
+Using Snowflake connection: your_admin_connection_name_here
+
+============================================================
+Executing 3 SQL file(s) in order:
+  1. 001-grants.sql
+  2. 002-grants-cortex-ai.sql
+  3. 003-grants_streamlit.sql
+============================================================
+Running command:
+  snow sql -c your_admin_connection_name_here \
+    -f sql/batch-1/001-grants.sql \
+    -f sql/batch-1/002-grants-cortex-ai.sql \
+    -f sql/batch-1/003-grants_streamlit.sql \
+
+USE ROLE securityadmin;
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+GRANT USAGE on WAREHOUSE demo_s_wh TO ROLE ins_co_claims_rw;
++----------------------------------+
+| status                           |
+|----------------------------------|
+| Statement executed successfully. |
++----------------------------------+
+...
+
+============================================================
+✓ Successfully executed all 3 SQL file(s)
+============================================================
+```
+
+This executes SQL files in `sql/batch-1/`:
+
+- Grants database and schema privileges to roles
+- Configures Cortex AI permissions
+- Sets up Cortex Search Intelligence permissions
+- Configures Streamlit deployment permissions
+
+### Step 3: User Setup
+
+**Persona:** Admin (requires USERADMIN roles)
+
+The demo requires service users to be created in Snowflake with RSA keypair authentication. Setting up the users is outside the scope of this guide, but the following provides an overview:
+
+#### User 1 - Local Development User
+
+For local development and testing:
+
+1. Create a service user in Snowflake (e.g., `ga_mock`)
+2. Generate an RSA keypair for the user
+3. Set the public key for the user in Snowflake
+4. Grant the `INS_CO_USER` role to the user
+5. Create a new connection in the Snowflake CLI for the user
+6. Test the connection to ensure it is working
+
+#### User 2 - GitHub Actions User (Optional)
+
+For CI/CD deployment via GitHub Actions:
+
+1. Create a service user in Snowflake (e.g., `ga_dev`)
+2. Generate an RSA keypair for the user
+3. Set the public key for the user in Snowflake
+4. Grant the `INS_CO_USER` role to the user
+5. Set the private key in GitHub Actions secrets as `SNOWFLAKE_PRIVATE_KEY_RAW`
+6. Create a new connection in the Snowflake CLI for the user
+
+**Optional: Set network policy for GitHub Actions user:**
 
 ```sql
 SHOW NETWORK RULES IN SNOWFLAKE.NETWORK_SECURITY;
 
 SELECT *
   FROM SNOWFLAKE.ACCOUNT_USAGE.NETWORK_RULES
-  WHERE DATABASE = 'SNOWFLAKE' 
+  WHERE DATABASE = 'SNOWFLAKE'
     AND SCHEMA = 'NETWORK_SECURITY'
     AND NAME = 'GITHUBACTIONS_GLOBAL';
 
@@ -86,58 +253,45 @@ CREATE OR REPLACE NETWORK POLICY github_actions_ingress ALLOWED_NETWORK_RULE_LIS
 ALTER USER ga_dev SET NETWORK_POLICY = github_actions_ingress;
 ```
 
-## Step 3: Grants Initialization
+## Environment Setup for Demo Deployment
 
-Run the following command to issue the grants to the users:
+### Persona: Admin & Engineer
 
-```bash
-DOTENV_FILENAME=demo_init.env task demo-init-2
-```
+After completing the admin persona steps above, configure the environment for engineer persona demo deployment. This uses a different connection (the service user created in Step 3) with standard privileges.
 
-> Note: The `demo_init.env` file is a template for the environment variables used by the init tasks for the demo. It is located in the `.env` directory.
-> You can copy it to `demo_init.env` and fill in the required values.
-> The `CLI_CONNECTION_NAME` must match a connection configured in your Snowflake CLI that has the SYSADMIN and USERADMIN roles.
+### 1. Configure Demo Environment File
 
-## Environment Setup
-
-### 1. Create Environment Configuration
-
-Create a `.env` directory in the project root:
-
-```bash
-mkdir -p .env
-```
-
-### 2. Configure Environment File
-
-Create a `.env/demo.env` file based on the provided template. Copy and modify the following:
+Create a `.env/demo.env` file based on the provided template. This is used by the regular demo users (not the elevated admin user):
 
 ```bash
 # This is a template for the demo.env file used by the demo scripts.
 # Copy this file to demo.env and fill in the required values.
 
-# The Snowflake connection name configured in snow-cli for keypair authentication.
-CLI_CONNECTION_NAME=your_connection_name_here
+# The Snowflake connection name for your service user (e.g., ga_mock)
+# This should be a standard user with INS_CO_USER role, NOT the admin user
+CLI_CONNECTION_NAME=your_service_user_connection_name_here
 
-# All objects are created in this database and schema.
+# All objects are created in this database and schema (created by admin in batch-0)
 DEMO_DATABASE_NAME=INS_CO
 DEMO_SCHEMA_NAME=INS_CO.LOSS_CLAIMS
 
 # Database name used for teardown (should match DEMO_DATABASE_NAME)
 DATABASE_NAME=INS_CO
 
-# The internal named stage used to upload files for the demo.
+# The internal named stage used to upload files for the demo
 INTERNAL_NAMED_STAGE=@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE
 
-# The task which runs the file upload and streamlit app deploy runs from the snow-cli directory.
-# The upload and streamlit directories are relative to that.
+# The task which runs the file upload and streamlit app deploy runs from the snow-cli directory
+# The upload and streamlit directories are relative to that
 FILE_UPLOAD_DIR="../../upload"
 STREAMLIT_APP_DIR=streamlit
 ```
 
 **Important Notes:**
-- `CLI_CONNECTION_NAME`: Must match a connection configured in your Snowflake CLI
-- `DEMO_DATABASE_NAME`: The database where all objects will be created (e.g., `INS_CO`)
+
+- `CLI_CONNECTION_NAME`: Must match a connection configured in your Snowflake CLI for your service user (e.g., `ga_mock` or `ga_dev`), NOT the admin user
+- This user should have the `INS_CO_USER` role granted (configured in Step 2 above)
+- `DEMO_DATABASE_NAME`: The database created by the admin (e.g., `INS_CO`)
 - `DEMO_SCHEMA_NAME`: Fully qualified schema name in format `database.schema` (e.g., `INS_CO.LOSS_CLAIMS`)
 - `DATABASE_NAME`: Used by the teardown task (should match `DEMO_DATABASE_NAME`)
 - `INTERNAL_NAMED_STAGE`: Fully qualified stage name with `@` prefix (e.g., `@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE`)
@@ -151,17 +305,21 @@ DOTENV_FILENAME=custom.env task demo-up
 
 ### 3. Configure Snowflake CLI Connection
 
-Ensure your Snowflake CLI is configured with a valid connection profile that matches `CLI_CONNECTION_NAME`:
+Ensure your Snowflake CLI is configured with a valid connection profile for your service user that matches `CLI_CONNECTION_NAME`:
 
 ```bash
-snow connection test --connection your_connection_name
+snow connection test --connection your_service_user_connection_name
 ```
 
-## Deployment
+## Demo Deployment
+
+**Prerequisites:** Admin setup (Steps 1-3 above) must be completed first.
+
+After the admin has completed the one-time initialization (`demo-init-1` and `demo-init-2`), both admin and engineer personas can run the demo-up task to deploy the demo application.
 
 ### Deploy the Demo
 
-Run the following command to deploy the entire demo:
+Run the following command to deploy the entire demo (Persona: Admin & Engineer):
 
 ```bash
 task demo-up
@@ -169,13 +327,14 @@ task demo-up
 
 This command executes the following steps in sequence:
 
+**Admin Responsibilities (Batch-2):**
+
 1. **Validate Prerequisites** - Verify that Snowflake CLI is properly installed and configured
 
-2. **Create Database Schema and Tables (Batch 1)** - Execute SQL files in `sql/batch-1/`:
-   - Create the `INS_CO` database
-   - Create the `LOSS_CLAIMS` schema
+2. **Create Tables and Stages (Batch-2)** - Execute SQL files in `sql/batch-2/`:
    - Create all required tables (CLAIMS, CLAIM_LINES, FINANCIAL_TRANSACTIONS, AUTHORIZATION, INVOICES, etc.)
    - Create chunk tables for notes and guidelines
+   - Create the `LOSS_EVIDENCE` internal stage for file storage
 
 3. **Upload Sample Files to Stage** - Upload all files from the `upload/` directory to the `LOSS_EVIDENCE` stage:
    - Claim evidence images (JPEG files)
@@ -184,7 +343,9 @@ This command executes the following steps in sequence:
    - Invoices (PNG)
    - Call recordings (WAV)
 
-4. **Create Cortex Services and Custom Tools (Batch 2)** - Execute SQL files in `sql/batch-2/`:
+**Engineer Responsibilities (Batch-3 + Applications):**
+
+1. **Create Cortex Services and Data (Batch-3)** - Execute SQL files in `sql/batch-3/`:
    - Refresh and populate the stage
    - Insert sample data into tables (DML operations)
    - Create Cortex Search services for claim notes and guidelines
@@ -192,22 +353,35 @@ This command executes the following steps in sequence:
    - Create semantic views for Cortex Analyst
    - Create MCP server configuration
 
-5. **Create the Agent** - Deploy the Claims Audit Agent with integrated tools:
+2. **Create the Agent** - Deploy the Claims Audit Agent with integrated tools:
    - Cortex Analyst for SQL-based queries
    - Cortex Search for guidelines and notes
    - Custom tools for document parsing, image analysis, audio transcription, document classification, and PII redaction
 
-6. **Deploy Streamlit App** - Deploy the web-based claims audit interface to Snowflake
+3. **Deploy Streamlit App** - Deploy the web-based claims audit interface to Snowflake
+
+### Deployment Summary by Persona
+
+| Step | Batch   | Persona  | Task                    | Frequency                      |
+|------|---------|----------|-------------------------|--------------------------------|
+| 1    | Batch-0 | Admin    | Infrastructure setup    | One-time (elevated privileges) |
+| 2    | Batch-1 | Admin    | Grants configuration    | One-time (elevated privileges) |
+| 3    | N/A     | Admin    | User creation           | One-time (manual)              |
+| 4    | Batch-2 | Admin    | Tables & Stages         | Per deployment                 |
+| 5    | Batch-3 | Engineer | Data & Cortex services  | Per deployment                 |
+| 6    | N/A     | Engineer | Agent & Streamlit       | Per deployment                 |
 
 ### What Gets Created
 
 The deployment creates the following Snowflake objects:
 
 #### Database & Schema
+
 - Database: `INS_CO`
 - Schema: `LOSS_CLAIMS`
 
 #### Tables
+
 - `CLAIMS` - Main claims data with policy details and loss information
 - `CLAIM_LINES` - Individual line items for each claim
 - `FINANCIAL_TRANSACTIONS` - Payment and reserve transactions
@@ -220,9 +394,11 @@ The deployment creates the following Snowflake objects:
 - `GUIDELINES_CHUNK_TABLE` - Chunked guidelines for search
 
 #### Stages
+
 - `LOSS_EVIDENCE` - Internal stage for claim evidence files (images, documents, audio)
 
 #### Cortex Services
+
 - **Cortex Search Services:**
   - `INS_CO_CLAIM_NOTES` - Search service for claim notes
   - `INS_CO_GUIDELINES` - Search service for insurance guidelines
@@ -231,6 +407,7 @@ The deployment creates the following Snowflake objects:
   - `CA_INS_CO` - Cortex Analyst semantic model for the claims database
 
 #### Custom Functions & Procedures
+
 - `CLASSIFY_DOCUMENT` - AI-powered document classification
 - `PARSE_DOCUMENT_FROM_STAGE` - Extract text from documents
 - `GET_IMAGE_SUMMARY` - Generate AI summaries of images
@@ -238,9 +415,11 @@ The deployment creates the following Snowflake objects:
 - `REDACT_CLAIM_EMAIL_PII` - Redact PII from emails
 
 #### Agent
+
 - `CLAIMS_AUDIT_AGENT` - Intelligent agent with access to all tools and data
 
 #### Streamlit Application
+
 - Claims audit web interface with natural language query capabilities
 
 ## Using the Demo
@@ -305,16 +484,34 @@ This will drop the database specified in `DATABASE_NAME` (configured in your `.e
 
 ### Running Individual Tasks
 
-You can run specific parts of the deployment individually:
+You can run specific parts of the deployment individually based on your persona:
 
-#### Create Database and Tables Only
+#### Admin Tasks (Infrastructure & Security)
+
+##### Initialize Infrastructure (Batch 0 - Warehouses, Roles, Database)
+
+```bash
+DOTENV_FILENAME=demo_init.env task demo-init-1
+```
+
+Note: This requires SYSADMIN and USERADMIN roles
+
+##### Configure Grants (Batch 1 - Permissions)
+
+```bash
+DOTENV_FILENAME=demo_init.env task demo-init-2
+```
+
+##### Create Tables and Stages (Batch 2)
+
 ```bash
 task snow-cli:sort-and-process-sql-folder \
-  SQL_SORT_PROCESS_DIR=sql/batch-1 \
+  SQL_SORT_PROCESS_DIR=sql/batch-2 \
   CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
 ```
 
-#### Upload Files to Stage
+##### Upload Files to Stage
+
 ```bash
 task snow-cli:upload-files-to-internal-named-stage \
   FILE_UPLOAD_DIR=$FILE_UPLOAD_DIR \
@@ -322,19 +519,24 @@ task snow-cli:upload-files-to-internal-named-stage \
   INTERNAL_NAMED_STAGE=$INTERNAL_NAMED_STAGE
 ```
 
-#### Process Additional SQL Files
+#### Engineer Tasks (Data & AI Services)
+
+##### Process Data and Create Cortex Services (Batch 3)
+
 ```bash
 task snow-cli:sort-and-process-sql-folder \
-  SQL_SORT_PROCESS_DIR=sql/batch-2 \
+  SQL_SORT_PROCESS_DIR=sql/batch-3 \
   CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
 ```
 
-#### Create Agent Only
+##### Create Agent Only
+
 ```bash
 task snow-cli:create-agent
 ```
 
-#### Deploy Streamlit App Only
+##### Deploy Streamlit App Only
+
 ```bash
 task snow-cli:deploy-streamlit-app \
   STREAMLIT_APP_DIR=$STREAMLIT_APP_DIR \
@@ -389,6 +591,7 @@ The Claims Audit Agent integrates multiple Cortex AI capabilities:
 If you encounter connection errors:
 
 1. Verify your Snowflake CLI connection:
+
    ```bash
    snow connection test --connection your_connection_name
    ```
@@ -416,22 +619,25 @@ If the Streamlit app doesn't deploy:
 
 ## Project Structure
 
-```
+```text
 .
 ├── Taskfile.yml                          # Main task definitions
 ├── .env/                                 # Environment configurations
-│   └── demo.env                         # Demo environment variables
+│   ├── demo.env                         # Demo environment variables
+│   └── demo_init.env                    # Initialization environment variables
 ├── tasks/
 │   ├── snow-cli/
 │   │   ├── snowcli-tasks.yml           # Snowflake CLI task definitions
 │   │   ├── sql/
-│   │   │   ├── batch-1/                # Initial setup SQL files
-│   │   │   └── batch-2/                # Secondary setup SQL files
+│   │   │   ├── batch-0/                # Infrastructure: warehouses, roles, db/schema (Admin)
+│   │   │   ├── batch-1/                # Security: grants and permissions (Admin)
+│   │   │   ├── batch-2/                # Schema: tables and stages (Admin)
+│   │   │   └── batch-3/                # Data & AI: DML, Cortex services, functions (Engineer)
 │   │   ├── agent/
 │   │   │   └── sql/
-│   │   │       └── create_agents.sql   # Agent configuration
+│   │   │       └── create_agents.sql   # Agent configuration (Engineer)
 │   │   ├── streamlit/
-│   │   │   ├── streamlit_app.py        # Streamlit application
+│   │   │   ├── streamlit_app.py        # Streamlit application (Engineer)
 │   │   │   └── environment.yml         # Python dependencies
 │   │   └── pyutil/                     # Python utility scripts
 │   └── validate-prerequisites/         # Prerequisite validation tasks
@@ -450,5 +656,3 @@ For more information:
 ## License
 
 See project license file for details.
-
-der
