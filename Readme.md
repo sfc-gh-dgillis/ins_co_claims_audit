@@ -562,6 +562,143 @@ task snow-cli:deploy-streamlit-app \
 
 The `--replace` flag ensures the existing app is updated.
 
+## CI/CD with GitHub Actions
+
+This project includes automated deployment via GitHub Actions for continuous integration and deployment.
+
+### CI/CD Overview
+
+The CI/CD pipeline automatically deploys the demo to Snowflake when changes are pushed to the `main` or `dgillis-dev` branches, or when pull requests are opened against these branches. It can also be triggered manually from the GitHub Actions tab.
+
+### Workflow Configuration
+
+The workflow is defined in `.github/workflows/ci.yml` and performs the following steps:
+
+#### 1. Trigger Events
+
+The workflow runs on:
+
+- **Push events** to `main` or `dgillis-dev` branches
+- **Pull request events** targeting `main` or `dgillis-dev` branches
+- **Manual triggers** via the GitHub Actions `workflow_dispatch` event
+
+#### 2. Deployment Steps
+
+The GitHub Actions workflow executes these steps:
+
+1. **Checkout Repository** - Clones the repository code using `actions/checkout@v4`
+
+2. **Create Environment File** - Dynamically generates `.env/demo.env` with:
+   - Connection name: `ga_dev_keypair_auth`
+   - Database: `ins_co`
+   - Schema: `ins_co.loss_claims`
+   - Stage: `@ins_co.loss_claims.loss_evidence`
+   - File paths for uploads and Streamlit
+
+3. **Setup Taskfile CLI** - Installs the Go Task runner using `go-task/setup-task@v1.0.0`
+
+4. **Setup Snowflake CLI** - Installs Snowflake CLI using `snowflakedb/snowflake-cli-action@v2.0`
+   - Configures connection from `.snowflake/config.toml`
+   - Uses JWT authentication (RSA keypair)
+
+5. **Execute Deployment** - Runs `task demo-up` to deploy the entire demo
+   - Uses environment variables for sensitive credentials
+   - Connects as the `ga_dev` service user
+   - Deploys to the configured Snowflake account
+
+### Required GitHub Secrets
+
+For the CI/CD pipeline to work, configure the following secrets in your GitHub repository settings:
+
+| Secret Name                   | Description                                                    | Example Value                      |
+|-------------------------------|----------------------------------------------------------------|------------------------------------|
+| `SNOWFLAKE_ACCOUNT`           | Your Snowflake account identifier                              | `abc12345.us-east-1`               |
+| `SNOWFLAKE_PRIVATE_KEY_RAW`   | The private key for the `ga_dev` service user (PEM format)     | `-----BEGIN PRIVATE KEY-----\n...` |
+
+#### Setting Up Secrets
+
+1. Navigate to your GitHub repository
+2. Go to Settings → Secrets and variables → Actions
+3. Click "New repository secret"
+4. Add each secret with its corresponding value
+
+### Snowflake Connection Configuration
+
+The workflow uses a pre-configured Snowflake connection defined in `.snowflake/config.toml`:
+
+```toml
+default_connection_name = "ga_dev_keypair_auth"
+
+[connections.ga_dev_keypair_auth]
+authenticator = "SNOWFLAKE_JWT"
+user = "ga_dev"
+role = "ins_co_ga_dev"
+warehouse = "demo_s_wh"
+```
+
+Key configuration details:
+
+- **Authenticator**: `SNOWFLAKE_JWT` for keypair authentication
+- **User**: `ga_dev` service account created during admin setup
+- **Role**: `ins_co_ga_dev` with necessary deployment permissions
+- **Warehouse**: `demo_s_wh` for compute resources
+- **Account & Private Key**: Provided via GitHub secrets at runtime
+
+### Environment Variables in GitHub Actions
+
+The workflow uses environment variables to inject sensitive credentials:
+
+```yaml
+env:
+  SNOWFLAKE_CONNECTIONS_GA_DEV_KEYPAIR_AUTH_ACCOUNT: ${{ secrets.SNOWFLAKE_ACCOUNT }}
+  SNOWFLAKE_CONNECTIONS_GA_DEV_KEYPAIR_AUTH_PRIVATE_KEY_RAW: ${{ secrets.SNOWFLAKE_PRIVATE_KEY_RAW }}
+```
+
+These environment variables follow the Snowflake CLI naming convention:
+
+- `SNOWFLAKE_CONNECTIONS_<CONNECTION_NAME>_ACCOUNT`
+- `SNOWFLAKE_CONNECTIONS_<CONNECTION_NAME>_PRIVATE_KEY_RAW`
+
+### Monitoring Deployments
+
+To monitor GitHub Actions deployments:
+
+1. Navigate to your repository on GitHub
+2. Click the "Actions" tab
+3. Select the "CI" workflow
+4. View individual workflow runs and their status
+5. Click on a run to see detailed logs for each step
+
+### Manual Deployment via GitHub Actions
+
+To manually trigger a deployment:
+
+1. Go to the "Actions" tab in your GitHub repository
+2. Select the "CI" workflow
+3. Click "Run workflow"
+4. Select the branch to deploy
+5. Click "Run workflow" to start the deployment
+
+### Differences from Local Deployment
+
+GitHub Actions deployment differs from local deployment in these ways:
+
+| Aspect               | Local Deployment                             | GitHub Actions                                              |
+|----------------------|----------------------------------------------|-------------------------------------------------------------|
+| **User**             | Your personal service user (e.g., `ga_mock`) | CI/CD service user (`ga_dev`)                               |
+| **Environment File** | Manually created `.env/demo.env`             | Dynamically generated during workflow                       |
+| **Credentials**      | Stored locally in Snowflake CLI config       | Provided via GitHub Secrets                                 |
+| **Network Access**   | Your local network                           | GitHub Actions IP addresses (set network policy)            |
+| **Trigger**          | Manual `task demo-up` command                | Automatic on push/PR or manual via UI                       |
+
+### Best Practices
+
+1. **Network Security**: Set a network policy on the `ga_dev` user to restrict access to GitHub Actions IP addresses only
+2. **Secret Rotation**: Regularly rotate the RSA keypair and update GitHub secrets
+3. **Branch Protection**: Enable branch protection rules to require successful CI checks before merging
+4. **Review Logs**: Always review deployment logs for any warnings or errors
+5. **Test in Dev Branch**: Use the `dgillis-dev` branch for testing before merging to `main`
+
 ## Architecture
 
 ### Data Flow
