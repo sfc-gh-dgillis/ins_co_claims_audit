@@ -1,6 +1,6 @@
 # Insurance Claims Audit Demo - Setup Guide
 
-This guide provides step-by-step instructions to deploy the Insurance Claims Audit demo using the automated `demo-up` task.
+This guide provides instructions to deploy the Insurance Claims Audit demo. You can choose between a simple manual setup or an automated CI/CD process using the Task runner.
 
 ## Overview
 
@@ -13,6 +13,68 @@ This demo showcases an insurance claims audit system built on Snowflake, featuri
 - **Streamlit in Snowflake** for the web-based user interface
 
 The system combines structured claims data with unstructured data from claim notes, state insurance guidelines, invoices, images, and call transcriptions to provide claims auditing capabilities.
+
+### Data Integration
+
+A core capability is the ability to join unstructured and structured data, providing a complete view of each claim:
+
+- **Structured Data:** Claims, financial transactions, and authorization records
+- **Unstructured Data:** Claim file notes, state insurance guidelines, invoices, claim photo evidence, and audio call files
+
+<img width="1069" height="748" alt="Insurance Claims Agent Demo Screenshot" src="https://github.com/user-attachments/assets/e92c1fb4-fe6e-42df-8cdc-96c582ad8c50" />
+
+## Manual Setup
+
+For a simple, direct setup process without automation, follow these steps in Snowflake.
+
+### Step 1: Initialize Database Objects
+
+Run the `setup.sql` file to create the necessary database objects:
+
+- **Database:** `ins_co`
+- **Schema:** `loss_claims`
+- **Stage:** `loss_evidence`
+- **Tables:** claims, claim_lines, financial_transactions, authorization, invoices, parsed_claim_notes, parsed_guidelines, parsed_invoices, notes_chunk_table, guidelines_chunk_table, notes_chunk_table_def, guidelines_chunk_table_def
+
+### Step 2: Upload Evidence Files
+
+Upload the following files to the `loss_evidence` stage:
+
+- `1899_claim_evidence1.jpeg`
+- `1899_claim_evidence2.jpeg`
+- `Claim_Notes.pdf`
+- `Guidelines.docx`
+- `invoice.png`
+- `Gemini_Generated3.jpeg`
+- `ins_co_1899_call.wav`
+
+### Step 3: Configure Cortex Analyst
+
+1. The setup script automatically creates a `Models` stage
+2. Upload the `CA_INS_CO.sql` file to create a semantic view
+3. Create a Cortex Analyst using the uploaded configuration file
+
+### Step 4: Deploy the Interface
+
+Choose one of the following methods:
+
+**Option A: Streamlit in Snowflake**
+
+1. Create a new Streamlit application within the `ins_co` database and `loss_claims` schema
+2. Paste the contents of the `streamlit.py` file into the Streamlit in Snowflake (SIS) editor
+
+**Option B: Snowflake Intelligence Agent**
+
+1. Create an Agent and use it directly within Snowflake Intelligence
+2. Run `Custom_tools.sql`
+3. Run the Tools config
+4. Run the Agents config
+
+---
+
+## Automated Setup (CI/CD)
+
+For automated deployment using the Task runner and CI/CD pipelines, follow the sections below.
 
 ## Personas
 
@@ -442,14 +504,39 @@ These files are uploaded to the `LOSS_EVIDENCE` stage during deployment.
 
 Once deployed, you can ask the Claims Audit Agent questions like:
 
+**Compliance & Guidelines:**
+
 - "Based on the state of New Jersey's insurance claims guidelines, have any of my claims been outside of the mandated settlement window?"
+- "Was the payment made according to the state guidelines?"
+- "According to the state guidelines, was the claim settled within the required timelines?"
+
+**Reserve Management:**
+
 - "Was there a reserve rationale in the file notes?"
+- "Did the reserve rationale adequately explain the reserve figure(s) set?"
+- "Was the reserve extension requested in a timely manner?"
 - "Was a payment made in excess of the reserve amount for claim 1899?"
+
+**Authority & Payments:**
+
+- "Were the reserving or payment amounts in excess of the examiner's authority?"
+- "When the claim exceeded the examiner's authority, were all elements of authority properly handled?"
+- "What percentage of payments were issued to the vendor within 3-5 calendar days after invoice receipt?"
+
+**Media & Document Analysis:**
+
 - "Can you transcribe the media file 'ins_co_1899_call.wav' stored in '@ins_co.loss_claims.loss_evidence'?"
 - "What is the caller's intent?"
 - "Can you give me a summary of 1899_claim_evidence1.jpeg image please?"
+
+**Fraud Detection & Verification:**
+
 - "What is the similarity score between the summary of the claim evidence and the claim description for claim 1899?"
 - "Does the file Gemini_Generated3.jpeg appear to be tampered with?"
+- "Confirm that the images shown here align with the claim made"
+
+**General:**
+
 - "Is claim 1899 complete?"
 
 ### Access the Streamlit App
@@ -780,6 +867,19 @@ If the Streamlit app doesn't deploy:
 │   └── validate-prerequisites/         # Prerequisite validation tasks
 └── upload/                              # Sample claim evidence files
 ```
+
+## Target Audience
+
+This demo provides value across multiple roles and departments:
+
+| Role/Department | Value Proposition |
+| :--- | :--- |
+| **Claims Adjusters/Examiners** | **Faster, More Accurate Decisions.** The agent instantly synthesizes information from all sources (structured data, notes, images, guidelines), providing a fast, data-driven assessment. The image comparison feature is valuable for fraud detection and evidence verification. |
+| **Claims Managers / VPs of Claims** | **Operational Efficiency and Consistency.** Demonstrates how to reduce the claim cycle time, ensure consistent application of company/state guidelines (by querying the `Parsed_guidelines` table), and handle higher claim volumes without proportional staff increases. |
+| **Special Investigations Unit (SIU) / Anti-Fraud** | **Advanced Fraud Detection.** The system's ability to join structured data with unstructured files (like call transcripts for tone analysis) and compare image evidence against claim descriptions is a powerful tool for flagging suspicious or inconsistent claims. |
+| **IT & Data Science / Data Engineering** | **Leveraging Modern Data Architecture.** This demo validates the use case for Snowflake Cortex and demonstrates that the data platform can handle unstructured data (PDFs, images, audio) alongside core transactional data, increasing the value of their data investment. |
+| **Compliance & Legal Teams** | **Auditability and Compliance.** By combining structured data with parsed state guidelines, the system helps ensure claims decisions are compliant with regulations, providing a clear, auditable trail for every decision. |
+| **Chief Operating Officer (COO)** | **Cost Reduction and Customer Experience.** Automating document ingestion and accelerating the decision process directly reduces operational costs and leads to faster, more positive interactions for policyholders. |
 
 ## Support and Documentation
 
