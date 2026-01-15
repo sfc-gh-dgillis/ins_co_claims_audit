@@ -25,20 +25,36 @@ A core capability is the ability to join unstructured and structured data, provi
 
 ## Manual Setup
 
-For a simple, direct setup process without automation, follow these steps in Snowflake.
+For a simple, direct setup process without automation, run the SQL scripts in `tasks/snow-cli/sql/` in order.
 
-### Step 1: Initialize Database Objects
+### Step 1: Infrastructure Setup (Batch-0)
 
-Run the `setup.sql` file to create the necessary database objects:
+Run the scripts in `tasks/snow-cli/sql/batch-0/` in order:
 
-- **Database:** `ins_co`
-- **Schema:** `loss_claims`
-- **Stage:** `loss_evidence`
-- **Tables:** claims, claim_lines, financial_transactions, authorization, invoices, parsed_claim_notes, parsed_guidelines, parsed_invoices, notes_chunk_table, guidelines_chunk_table, notes_chunk_table_def, guidelines_chunk_table_def
+1. `001-create_warehouses.sql` - Creates the demo warehouse
+2. `002-init_roles.sql` - Creates roles (`INS_CO_ADMIN`, `INS_CO_USER`)
+3. `003-db_schema.sql` - Creates database (`ins_co`) and schema (`loss_claims`)
 
-### Step 2: Upload Evidence Files
+**Note:** Requires SYSADMIN and USERADMIN roles.
 
-Upload the following files to the `loss_evidence` stage:
+### Step 2: Grant Configuration (Batch-1)
+
+Run the scripts in `tasks/snow-cli/sql/batch-1/` in order:
+
+1. `001-grants.sql` - Database and schema privileges
+2. `002-grants-cortex-ai.sql` - Cortex AI permissions
+3. `003-grants_streamlit.sql` - Streamlit deployment permissions
+
+### Step 3: Create Tables and Stages (Batch-2)
+
+Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
+
+1. `001-table_ddl.sql` - Creates all tables (claims, claim_lines, financial_transactions, authorization, invoices, parsed_claim_notes, parsed_guidelines, parsed_invoices, notes_chunk_table, guidelines_chunk_table, notes_chunk_table_def, guidelines_chunk_table_def)
+2. `002-stages.sql` - Creates the `loss_evidence` stage
+
+### Step 4: Upload Evidence Files
+
+Upload the following files from `files/` to the `loss_evidence` stage:
 
 - `1899_claim_evidence1.jpeg`
 - `1899_claim_evidence2.jpeg`
@@ -48,27 +64,31 @@ Upload the following files to the `loss_evidence` stage:
 - `Gemini_Generated3.jpeg`
 - `ins_co_1899_call.wav`
 
-### Step 3: Configure Cortex Analyst
+### Step 5: Data and Cortex Services (Batch-3)
 
-1. The setup script automatically creates a `Models` stage
-2. Upload the `CA_INS_CO.sql` file to create a semantic view
-3. Create a Cortex Analyst using the uploaded configuration file
+Run the scripts in `tasks/snow-cli/sql/batch-3/` in order:
 
-### Step 4: Deploy the Interface
+1. `003-refresh_stage.sql` - Refresh stage directory
+2. `004-table_dml.sql` - Insert sample data
+3. `005-cortex_search_services.sql` - Create Cortex Search services
+4. `006-custom_tools.sql` - Create custom functions (document parsing, image analysis, transcription, etc.)
+5. `007-semantic-views.sql` - Create semantic views for Cortex Analyst
+6. `008-create_mcp_server.sql` - Create MCP server configuration
 
-Choose one of the following methods:
+### Step 6: Deploy the Agent
+
+Run `tasks/snow-cli/agent/sql/create_agents.sql` to create the Claims Audit Agent.
+
+### Step 7: Deploy the Interface
 
 **Option A: Streamlit in Snowflake**
 
 1. Create a new Streamlit application within the `ins_co` database and `loss_claims` schema
-2. Paste the contents of the `streamlit.py` file into the Streamlit in Snowflake (SIS) editor
+2. Use the files in `tasks/snow-cli/streamlit/`
 
-**Option B: Snowflake Intelligence Agent**
+**Option B: Snowflake Intelligence**
 
-1. Create an Agent and use it directly within Snowflake Intelligence
-2. Run `Custom_tools.sql`
-3. Run the Tools config
-4. Run the Agents config
+Use the Claims Audit Agent directly within Snowflake Intelligence
 
 ---
 
