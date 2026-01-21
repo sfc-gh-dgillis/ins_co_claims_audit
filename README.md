@@ -54,7 +54,7 @@ Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
 
 ### Step 4: Upload Evidence Files
 
-Upload the following files from `files/` to the `loss_evidence` stage:
+Upload the following files from `upload/` to the `loss_evidence` stage:
 
 - `1899_claim_evidence1.jpeg`
 - `1899_claim_evidence2.jpeg`
@@ -909,7 +909,3 @@ For more information:
 - [Snowflake CLI Documentation](https://docs.snowflake.com/en/developer-guide/snowflake-cli/index)
 - [Streamlit in Snowflake Documentation](https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit)
 - [Task Runner Documentation](https://taskfile.dev/)
-
-## License
-
-See project license file for details.
