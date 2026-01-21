@@ -5,7 +5,7 @@ USE ROLE accountadmin;
 -- -----------------------------------------------------------------------
 -- Create a default Snowflake Intelligence object at the account level
 -- This would typically be done once per account by the role that manages Cortex tools.
-CREATE SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
+-- CREATE SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;
 
 -- Grant CREATE Snowflake Intelligence at the account level
 -- This would typically be done once per account by the role that manages Cortex tools.
