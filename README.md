@@ -42,8 +42,9 @@ Run the scripts in `tasks/snow-cli/sql/batch-0/` in order:
 Run the scripts in `tasks/snow-cli/sql/batch-1/` in order:
 
 1. `001-grants.sql` - Database and schema privileges
-2. `002-grants-cortex-ai.sql` - Cortex AI permissions
-3. `003-grants_streamlit.sql` - Streamlit deployment permissions
+2. `002-grants_cortex_ai.sql` - Cortex AI permissions
+3. `003-grants_snowflake_intelligence.sql` - Snowflake Intelligence permissions
+4. `004-grants_streamlit.sql` - Streamlit deployment permissions
 
 ### Step 3: Create Tables and Stages (Batch-2)
 
@@ -54,7 +55,7 @@ Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
 
 ### Step 4: Upload Evidence Files
 
-Upload the following files from `files/` to the `loss_evidence` stage:
+Upload the following files from `upload/` to the `loss_evidence` stage:
 
 - `1899_claim_evidence1.jpeg`
 - `1899_claim_evidence2.jpeg`
@@ -72,7 +73,7 @@ Run the scripts in `tasks/snow-cli/sql/batch-3/` in order:
 2. `004-table_dml.sql` - Insert sample data
 3. `005-cortex_search_services.sql` - Create Cortex Search services
 4. `006-custom_tools.sql` - Create custom functions (document parsing, image analysis, transcription, etc.)
-5. `007-semantic-views.sql` - Create semantic views for Cortex Analyst
+5. `007-semantic_views.sql` - Create semantic views for Cortex Analyst
 6. `008-create_mcp_server.sql` - Create MCP server configuration
 
 ### Step 6: Deploy the Agent
@@ -246,22 +247,22 @@ Scanning directory: sql/batch-1
 
 Found 3 SQL file(s) with numeric prefix:
   1. [001] 001-grants.sql
-  2. [002] 002-grants-cortex-ai.sql
-  3. [003] 003-grants_streamlit.sql
+  2. [002] 002-grants_cortex_ai.sql
+  3. [003] 004-grants_streamlit.sql
 
 Using Snowflake connection: your_admin_connection_name_here
 
 ============================================================
 Executing 3 SQL file(s) in order:
   1. 001-grants.sql
-  2. 002-grants-cortex-ai.sql
-  3. 003-grants_streamlit.sql
+  2. 002-grants_cortex_ai.sql
+  3. 004-grants_streamlit.sql
 ============================================================
 Running command:
   snow sql -c your_admin_connection_name_here \
     -f sql/batch-1/001-grants.sql \
-    -f sql/batch-1/002-grants-cortex-ai.sql \
-    -f sql/batch-1/003-grants_streamlit.sql \
+    -f sql/batch-1/002-grants_cortex_ai.sql \
+    -f sql/batch-1/004-grants_streamlit.sql \
 
 USE ROLE securityadmin;
 +----------------------------------+
@@ -909,7 +910,3 @@ For more information:
 - [Snowflake CLI Documentation](https://docs.snowflake.com/en/developer-guide/snowflake-cli/index)
 - [Streamlit in Snowflake Documentation](https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit)
 - [Task Runner Documentation](https://taskfile.dev/)
-
-## License
-
-See project license file for details.
