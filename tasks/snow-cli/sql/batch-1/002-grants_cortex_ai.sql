@@ -1,3 +1,5 @@
+USE ROLE securityadmin;
+
 -- -----------------------------------------------------------------------
 -- LOSS_CLAIMS Schema-Level Cortex Grants
 -- -----------------------------------------------------------------------
@@ -9,6 +11,7 @@ GRANT CREATE AGENT ON SCHEMA ins_co.loss_claims TO ROLE ins_co_claims_rw;
 
 -- Grant Cortex database role
 GRANT DATABASE ROLE SNOWFLAKE.CORTEX_USER TO ROLE ins_co_claims_rw;
+
 
 -- For Cortex Search Service tool
 -- GRANT USAGE ON CORTEX SEARCH SERVICE my_database.my_schema.my_search_service TO ROLE my_role;
