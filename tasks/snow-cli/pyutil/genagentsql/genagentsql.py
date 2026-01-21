@@ -50,6 +50,10 @@ def render_agent_statement(record):
     lines.append(spec_text)
     lines.append("  $$;")
 
+    # Add the agent to the default Snowflake Intelligence object
+    lines.append("")
+    lines.append(f"ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT ADD AGENT {full_name};")
+
     return "\n".join(lines)
 
 
