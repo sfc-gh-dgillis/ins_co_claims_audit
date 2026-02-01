@@ -818,11 +818,11 @@ Run `tasks/snow-cli/agent/sql/create_agents.sql` to create the Claims Audit Agen
 
 ### Step 6: Deploy the Interface
 
-**Option A: Streamlit in Snowflake**
+#### Option A: Streamlit in Snowflake
 
 1. Create a new Streamlit application within the `ins_co` database and `loss_claims` schema
 2. Use the files in `tasks/snow-cli/streamlit/`
 
-**Option B: Snowflake Intelligence**
+#### Option B: Snowflake Intelligence
 
 Use the Claims Audit Agent directly within Snowflake Intelligence
