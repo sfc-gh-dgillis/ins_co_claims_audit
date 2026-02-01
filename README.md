@@ -21,7 +21,7 @@ A core capability is the ability to join unstructured and structured data, provi
 - **Structured Data:** Claims, financial transactions, and authorization records
 - **Unstructured Data:** Claim file notes, state insurance guidelines, invoices, claim photo evidence, and audio call files
 
-<img width="1069" height="748" alt="Insurance Claims Agent Demo Screenshot" src="https://github.com/user-attachments/assets/e92c1fb4-fe6e-42df-8cdc-96c582ad8c50" />
+![Insurance Claims Agent Demo Screenshot](https://github.com/user-attachments/assets/e92c1fb4-fe6e-42df-8cdc-96c582ad8c50)
 
 ## Personas
 
