@@ -1,6 +1,6 @@
 # Insurance Claims Audit Demo - Setup Guide
 
-This guide provides instructions to deploy the Insurance Claims Audit demo. You can choose between a simple manual setup or an automated CI/CD process using the Task runner.
+This guide provides instructions to deploy the Insurance Claims Audit demo using the automated Task runner and CI/CD pipelines. For a simpler approach without automation, see [Manual Setup](#manual-setup).
 
 ## Overview
 
@@ -22,75 +22,6 @@ A core capability is the ability to join unstructured and structured data, provi
 - **Unstructured Data:** Claim file notes, state insurance guidelines, invoices, claim photo evidence, and audio call files
 
 <img width="1069" height="748" alt="Insurance Claims Agent Demo Screenshot" src="https://github.com/user-attachments/assets/e92c1fb4-fe6e-42df-8cdc-96c582ad8c50" />
-
-## Manual Setup
-
-For a simple, direct setup process without automation, run the SQL scripts in `tasks/snow-cli/sql/` in order.
-
-### Step 1: Infrastructure and Grants Setup (Batch-0)
-
-Run the scripts in `tasks/snow-cli/sql/batch-0/` in order:
-
-1. `001-create_warehouses.sql` - Creates the demo warehouse
-2. `002-init_roles.sql` - Creates roles (`INS_CO_ADMIN`, `INS_CO_USER`)
-3. `003-db_schema.sql` - Creates database (`ins_co`) and schema (`loss_claims`)
-4. `004-grants.sql` - Database and schema privileges
-5. `005-grants_cortex_ai.sql` - Cortex AI permissions
-6. `006-grants_snowflake_intelligence.sql` - Snowflake Intelligence permissions
-7. `007-grants_streamlit.sql` - Streamlit deployment permissions
-
-**Note:** Requires SYSADMIN, USERADMIN, and SECURITYADMIN roles.
-
-### Step 2: Create Tables and Stages (Batch-2)
-
-Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
-
-1. `001-table_ddl.sql` - Creates all tables (claims, claim_lines, financial_transactions, authorization, invoices, parsed_claim_notes, parsed_guidelines, parsed_invoices, notes_chunk_table, guidelines_chunk_table, notes_chunk_table_def, guidelines_chunk_table_def)
-2. `002-stages.sql` - Creates the `loss_evidence` stage
-
-### Step 3: Upload Evidence Files
-
-Upload the following files from `upload/` to the `loss_evidence` stage:
-
-- `1899_claim_evidence1.jpeg`
-- `1899_claim_evidence2.jpeg`
-- `Claim_Notes.pdf`
-- `Guidelines.docx`
-- `invoice.png`
-- `Gemini_Generated3.jpeg`
-- `ins_co_1899_call.wav`
-
-### Step 4: Data and Cortex Services (Batch-3)
-
-Run the scripts in `tasks/snow-cli/sql/batch-3/` in order:
-
-1. `003-refresh_stage.sql` - Refresh stage directory
-2. `004-table_dml.sql` - Insert sample data
-3. `005-cortex_search_services.sql` - Create Cortex Search services
-4. `006-custom_tools.sql` - Create custom functions (document parsing, image analysis, transcription, etc.)
-5. `007-semantic_views.sql` - Create semantic views for Cortex Analyst
-6. `008-create_mcp_server.sql` - Create MCP server configuration
-
-### Step 5: Deploy the Agent
-
-Run `tasks/snow-cli/agent/sql/create_agents.sql` to create the Claims Audit Agent.
-
-### Step 6: Deploy the Interface
-
-**Option A: Streamlit in Snowflake**
-
-1. Create a new Streamlit application within the `ins_co` database and `loss_claims` schema
-2. Use the files in `tasks/snow-cli/streamlit/`
-
-**Option B: Snowflake Intelligence**
-
-Use the Claims Audit Agent directly within Snowflake Intelligence
-
----
-
-## Automated Setup (CI/CD)
-
-For automated deployment using the Task runner and CI/CD pipelines, follow the sections below.
 
 ## Personas
 
@@ -830,3 +761,68 @@ For more information:
 - [Snowflake CLI Documentation](https://docs.snowflake.com/en/developer-guide/snowflake-cli/index)
 - [Streamlit in Snowflake Documentation](https://docs.snowflake.com/en/developer-guide/streamlit/about-streamlit)
 - [Task Runner Documentation](https://taskfile.dev/)
+
+---
+
+## Manual Setup
+
+For a simple, direct setup process without automation, run the SQL scripts in `tasks/snow-cli/sql/` in order.
+
+### Step 1: Infrastructure and Grants Setup (Batch-0)
+
+Run the scripts in `tasks/snow-cli/sql/batch-0/` in order:
+
+1. `001-create_warehouses.sql` - Creates the demo warehouse
+2. `002-init_roles.sql` - Creates roles (`INS_CO_ADMIN`, `INS_CO_USER`)
+3. `003-db_schema.sql` - Creates database (`ins_co`) and schema (`loss_claims`)
+4. `004-grants.sql` - Database and schema privileges
+5. `005-grants_cortex_ai.sql` - Cortex AI permissions
+6. `006-grants_snowflake_intelligence.sql` - Snowflake Intelligence permissions
+7. `007-grants_streamlit.sql` - Streamlit deployment permissions
+
+**Note:** Requires SYSADMIN, USERADMIN, and SECURITYADMIN roles.
+
+### Step 2: Create Tables and Stages (Batch-2)
+
+Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
+
+1. `001-table_ddl.sql` - Creates all tables (claims, claim_lines, financial_transactions, authorization, invoices, parsed_claim_notes, parsed_guidelines, parsed_invoices, notes_chunk_table, guidelines_chunk_table, notes_chunk_table_def, guidelines_chunk_table_def)
+2. `002-stages.sql` - Creates the `loss_evidence` stage
+
+### Step 3: Upload Evidence Files
+
+Upload the following files from `upload/` to the `loss_evidence` stage:
+
+- `1899_claim_evidence1.jpeg`
+- `1899_claim_evidence2.jpeg`
+- `Claim_Notes.pdf`
+- `Guidelines.docx`
+- `invoice.png`
+- `Gemini_Generated3.jpeg`
+- `ins_co_1899_call.wav`
+
+### Step 4: Data and Cortex Services (Batch-3)
+
+Run the scripts in `tasks/snow-cli/sql/batch-3/` in order:
+
+1. `003-refresh_stage.sql` - Refresh stage directory
+2. `004-table_dml.sql` - Insert sample data
+3. `005-cortex_search_services.sql` - Create Cortex Search services
+4. `006-custom_tools.sql` - Create custom functions (document parsing, image analysis, transcription, etc.)
+5. `007-semantic_views.sql` - Create semantic views for Cortex Analyst
+6. `008-create_mcp_server.sql` - Create MCP server configuration
+
+### Step 5: Deploy the Agent
+
+Run `tasks/snow-cli/agent/sql/create_agents.sql` to create the Claims Audit Agent.
+
+### Step 6: Deploy the Interface
+
+**Option A: Streamlit in Snowflake**
+
+1. Create a new Streamlit application within the `ins_co` database and `loss_claims` schema
+2. Use the files in `tasks/snow-cli/streamlit/`
+
+**Option B: Snowflake Intelligence**
+
+Use the Claims Audit Agent directly within Snowflake Intelligence
