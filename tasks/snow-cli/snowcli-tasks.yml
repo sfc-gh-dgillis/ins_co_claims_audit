@@ -5,6 +5,7 @@ tasks:
   sort-and-process-sql-folder:
     desc: Sorts and processes all SQL files in the given directory. Sorts and executes SQL files with numeric prefixes (e.g., 001-schema.sql)
     cmds:
+      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" --query "SELECT CURRENT_ACCOUNT() AS ACCOUNT, CURRENT_ROLE() AS ROLE, CURRENT_DATABASE() AS DATABASE"
       - python3 pyutil/snowclisp/snowclisp.py "{{.SQL_SORT_PROCESS_DIR}}" "{{.CLI_CONNECTION_NAME}}"
 
   upload-files-to-internal-named-stage:

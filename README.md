@@ -27,33 +27,28 @@ A core capability is the ability to join unstructured and structured data, provi
 
 For a simple, direct setup process without automation, run the SQL scripts in `tasks/snow-cli/sql/` in order.
 
-### Step 1: Infrastructure Setup (Batch-0)
+### Step 1: Infrastructure and Grants Setup (Batch-0)
 
 Run the scripts in `tasks/snow-cli/sql/batch-0/` in order:
 
 1. `001-create_warehouses.sql` - Creates the demo warehouse
 2. `002-init_roles.sql` - Creates roles (`INS_CO_ADMIN`, `INS_CO_USER`)
 3. `003-db_schema.sql` - Creates database (`ins_co`) and schema (`loss_claims`)
+4. `004-grants.sql` - Database and schema privileges
+5. `005-grants_cortex_ai.sql` - Cortex AI permissions
+6. `006-grants_snowflake_intelligence.sql` - Snowflake Intelligence permissions
+7. `007-grants_streamlit.sql` - Streamlit deployment permissions
 
-**Note:** Requires SYSADMIN and USERADMIN roles.
+**Note:** Requires SYSADMIN, USERADMIN, and SECURITYADMIN roles.
 
-### Step 2: Grant Configuration (Batch-1)
-
-Run the scripts in `tasks/snow-cli/sql/batch-1/` in order:
-
-1. `001-grants.sql` - Database and schema privileges
-2. `002-grants_cortex_ai.sql` - Cortex AI permissions
-3. `003-grants_snowflake_intelligence.sql` - Snowflake Intelligence permissions
-4. `004-grants_streamlit.sql` - Streamlit deployment permissions
-
-### Step 3: Create Tables and Stages (Batch-2)
+### Step 2: Create Tables and Stages (Batch-2)
 
 Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
 
 1. `001-table_ddl.sql` - Creates all tables (claims, claim_lines, financial_transactions, authorization, invoices, parsed_claim_notes, parsed_guidelines, parsed_invoices, notes_chunk_table, guidelines_chunk_table, notes_chunk_table_def, guidelines_chunk_table_def)
 2. `002-stages.sql` - Creates the `loss_evidence` stage
 
-### Step 4: Upload Evidence Files
+### Step 3: Upload Evidence Files
 
 Upload the following files from `upload/` to the `loss_evidence` stage:
 
@@ -65,7 +60,7 @@ Upload the following files from `upload/` to the `loss_evidence` stage:
 - `Gemini_Generated3.jpeg`
 - `ins_co_1899_call.wav`
 
-### Step 5: Data and Cortex Services (Batch-3)
+### Step 4: Data and Cortex Services (Batch-3)
 
 Run the scripts in `tasks/snow-cli/sql/batch-3/` in order:
 
@@ -76,11 +71,11 @@ Run the scripts in `tasks/snow-cli/sql/batch-3/` in order:
 5. `007-semantic_views.sql` - Create semantic views for Cortex Analyst
 6. `008-create_mcp_server.sql` - Create MCP server configuration
 
-### Step 6: Deploy the Agent
+### Step 5: Deploy the Agent
 
 Run `tasks/snow-cli/agent/sql/create_agents.sql` to create the Claims Audit Agent.
 
-### Step 7: Deploy the Interface
+### Step 6: Deploy the Interface
 
 **Option A: Streamlit in Snowflake**
 
@@ -116,7 +111,7 @@ This demo is designed for two distinct personas:
 - Custom functions and procedures deployment
 - Infrastructure and security setup
 
-**Handles:** Batch-0 (infrastructure), Batch-1 (grants), and Batch-2 (schema objects) SQL deployments
+**Handles:** Batch-0 (infrastructure and grants) and Batch-2 (schema objects) SQL deployments
 
 ### AI Engineer Persona
 
@@ -155,15 +150,15 @@ task validate-prerequisites:snowcli
 
 The following steps must be performed by the **Admin Persona** with elevated Snowflake privileges. These are one-time setup steps that create the infrastructure and security foundation for the demo.
 
-### Step 1: Infrastructure Initialization (Batch-0)
+### Step 1: Infrastructure and Grants Initialization (Batch-0)
 
-**Persona:** Admin (requires SYSADMIN and USERADMIN roles)
+**Persona:** Admin (requires SYSADMIN, USERADMIN, and SECURITYADMIN roles)
 
-This step creates the foundational Snowflake objects: warehouses, roles, database, and schema.
+This step creates the foundational Snowflake objects (warehouses, roles, database, schema) and configures all necessary grants and permissions.
 
 **Prerequisites:**
 
-- A Snowflake user with SYSADMIN and USERADMIN roles
+- A Snowflake user with SYSADMIN, USERADMIN, and SECURITYADMIN roles
 - A Snowflake CLI connection configured for this user
 
 **Create the demo_init.env file:**
@@ -176,51 +171,39 @@ CLI_CONNECTION_NAME=your_admin_connection_name_here
 DEMO_DATABASE_NAME=ins_co
 ```
 
-**Run the infrastructure initialization:**
+**Run the infrastructure and grants initialization:**
 
 ```bash
-$ DOTENV_FILENAME=demo_init.env task demo-init-1
+$ DOTENV_FILENAME=demo_init.env task demo-init
 Snowflake CLI (snow) is installed.
 task: [snow-cli:sort-and-process-sql-folder] python3 pyutil/snowclisp/snowclisp.py "sql/batch-0" "$CLI_CONNECTION_NAME"
 Scanning directory: sql/batch-0                                                                                                                                                                              
 
-Found 3 SQL file(s) with numeric prefix:
+Found 7 SQL file(s) with numeric prefix:
   1. [001] 001-create_warehouses.sql
   2. [002] 002-init_roles.sql
   3. [003] 003-db_schema.sql
+  4. [004] 004-grants.sql
+  5. [005] 005-grants_cortex_ai.sql
+  6. [006] 006-grants_snowflake_intelligence.sql
+  7. [007] 007-grants_streamlit.sql
 
 Using Snowflake connection: your_admin_connection_name_here
 
 ============================================================
-Executing 3 SQL file(s) in order:
+Executing 7 SQL file(s) in order:
   1. 001-create_warehouses.sql
   2. 002-init_roles.sql
   3. 003-db_schema.sql
+  4. 004-grants.sql
+  5. 005-grants_cortex_ai.sql
+  6. 006-grants_snowflake_intelligence.sql
+  7. 007-grants_streamlit.sql
 ============================================================
-Running command:
-  snow sql -c your_admin_connection_name_here \
-    -f sql/batch-0/001-create_warehouses.sql \
-    -f sql/batch-0/002-init_roles.sql \
-    -f sql/batch-0/003-db_schema.sql \
-
-USE ROLE sysadmin;
-+----------------------------------+
-| status                           |
-|----------------------------------|
-| Statement executed successfully. |
-+----------------------------------+
-CREATE OR REPLACE WAREHOUSE demo_s_wh
-    WITH WAREHOUSE_SIZE = SMALL
-    INITIALLY_SUSPENDED = TRUE;
-+-------------------------------------------+
-| status                                    |
-|-------------------------------------------|
-| Warehouse DEMO_S_WH successfully created. |
-+-------------------------------------------+
 ...
 
 ============================================================
-✓ Successfully executed all 3 SQL file(s)
+✓ Successfully executed all 7 SQL file(s)
 ============================================================
 ```
 
@@ -230,67 +213,12 @@ This executes SQL files in `sql/batch-0/`:
 - Creates roles: `INS_CO_ADMIN` and `INS_CO_USER`
 - Creates the `INS_CO` database
 - Creates the `LOSS_CLAIMS` schema
-
-### Step 2: Grant Configuration (Batch-1)
-
-**Persona:** Admin (requires SYSADMIN and USERADMIN roles)
-
-This step configures all necessary grants and permissions for the demo users and roles.
-
-**Run the grants configuration:**
-
-```bash
-$ DOTENV_FILENAME=demo_init.env task demo-init-2
-Snowflake CLI (snow) is installed.
-task: [snow-cli:sort-and-process-sql-folder] python3 pyutil/snowclisp/snowclisp.py "sql/batch-1" "$CLI_CONNECTION_NAME"
-Scanning directory: sql/batch-1
-
-Found 3 SQL file(s) with numeric prefix:
-  1. [001] 001-grants.sql
-  2. [002] 002-grants_cortex_ai.sql
-  3. [003] 004-grants_streamlit.sql
-
-Using Snowflake connection: your_admin_connection_name_here
-
-============================================================
-Executing 3 SQL file(s) in order:
-  1. 001-grants.sql
-  2. 002-grants_cortex_ai.sql
-  3. 004-grants_streamlit.sql
-============================================================
-Running command:
-  snow sql -c your_admin_connection_name_here \
-    -f sql/batch-1/001-grants.sql \
-    -f sql/batch-1/002-grants_cortex_ai.sql \
-    -f sql/batch-1/004-grants_streamlit.sql \
-
-USE ROLE securityadmin;
-+----------------------------------+
-| status                           |
-|----------------------------------|
-| Statement executed successfully. |
-+----------------------------------+
-GRANT USAGE on WAREHOUSE demo_s_wh TO ROLE ins_co_claims_rw;
-+----------------------------------+
-| status                           |
-|----------------------------------|
-| Statement executed successfully. |
-+----------------------------------+
-...
-
-============================================================
-✓ Successfully executed all 3 SQL file(s)
-============================================================
-```
-
-This executes SQL files in `sql/batch-1/`:
-
 - Grants database and schema privileges to roles
 - Configures Cortex AI permissions
 - Sets up Cortex Search Intelligence permissions
 - Configures Streamlit deployment permissions
 
-### Step 3: User Setup
+### Step 2: User Setup
 
 **Persona:** Admin (requires USERADMIN roles)
 
@@ -398,7 +326,7 @@ snow connection test --connection your_service_user_connection_name
 
 **Prerequisites:** Admin setup (Steps 1-3 above) must be completed first.
 
-After the admin has completed the one-time initialization (`demo-init-1` and `demo-init-2`), both admin and engineer personas can run the demo-up task to deploy the demo application.
+After the admin has completed the one-time initialization (`demo-init`), both admin and engineer personas can run the demo-up task to deploy the demo application.
 
 ### Deploy the Demo
 
@@ -445,14 +373,13 @@ This command executes the following steps in sequence:
 
 ### Deployment Summary by Persona
 
-| Step | Batch   | Persona  | Task                    | Frequency                      |
-|------|---------|----------|-------------------------|--------------------------------|
-| 1    | Batch-0 | Admin    | Infrastructure setup    | One-time (elevated privileges) |
-| 2    | Batch-1 | Admin    | Grants configuration    | One-time (elevated privileges) |
-| 3    | N/A     | Admin    | User creation           | One-time (manual)              |
-| 4    | Batch-2 | Admin    | Tables & Stages         | Per deployment                 |
-| 5    | Batch-3 | Engineer | Data & Cortex services  | Per deployment                 |
-| 6    | N/A     | Engineer | Agent & Streamlit       | Per deployment                 |
+| Step | Batch   | Persona  | Task                         | Frequency                      |
+|------|---------|----------|------------------------------|--------------------------------|
+| 1    | Batch-0 | Admin    | Infrastructure & Grants      | One-time (elevated privileges) |
+| 2    | N/A     | Admin    | User creation                | One-time (manual)              |
+| 3    | Batch-2 | Admin    | Tables & Stages              | Per deployment                 |
+| 4    | Batch-3 | Engineer | Data & Cortex services       | Per deployment                 |
+| 5    | N/A     | Engineer | Agent & Streamlit            | Per deployment                 |
 
 ### What Gets Created
 
@@ -596,19 +523,13 @@ You can run specific parts of the deployment individually based on your persona:
 
 #### Admin Tasks (Infrastructure & Security)
 
-##### Initialize Infrastructure (Batch 0 - Warehouses, Roles, Database)
+##### Initialize Infrastructure and Grants (Batch 0 - Warehouses, Roles, Database, Permissions)
 
 ```bash
-DOTENV_FILENAME=demo_init.env task demo-init-1
+DOTENV_FILENAME=demo_init.env task demo-init
 ```
 
-Note: This requires SYSADMIN and USERADMIN roles
-
-##### Configure Grants (Batch 1 - Permissions)
-
-```bash
-DOTENV_FILENAME=demo_init.env task demo-init-2
-```
+Note: This requires SYSADMIN, USERADMIN, and SECURITYADMIN roles
 
 ##### Create Tables and Stages (Batch 2)
 
@@ -874,8 +795,7 @@ If the Streamlit app doesn't deploy:
 │   ├── snow-cli/
 │   │   ├── snowcli-tasks.yml           # Snowflake CLI task definitions
 │   │   ├── sql/
-│   │   │   ├── batch-0/                # Infrastructure: warehouses, roles, db/schema (Admin)
-│   │   │   ├── batch-1/                # Security: grants and permissions (Admin)
+│   │   │   ├── batch-0/                # Infrastructure & Security: warehouses, roles, db/schema, grants (Admin)
 │   │   │   ├── batch-2/                # Schema: tables and stages (Admin)
 │   │   │   └── batch-3/                # Data & AI: DML, Cortex services, functions (Engineer)
 │   │   ├── agent/
