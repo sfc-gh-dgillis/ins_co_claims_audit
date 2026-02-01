@@ -34,6 +34,7 @@ tasks:
       - python3 pyutil/genagentsql/genagentsql.py -i agent/json/describe_agent_output.json -o agent/sql/create_agents.sql
 
   create-agent:
-    desc: Creates agents from create_agents.json file.
+    desc: Creates agents from create_agents.sql file and adds them to Snowflake Intelligence.
     cmds:
       - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/sql/create_agents.sql
+      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/sql/add_agents_to_si.sql

@@ -50,9 +50,30 @@ def render_agent_statement(record):
     lines.append(spec_text)
     lines.append("  $$;")
 
-    # Add the agent to the default Snowflake Intelligence object
-    lines.append("")
-    lines.append(f"ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT ADD AGENT {full_name};")
+    return "\n".join(lines)
+
+
+def render_add_agent_to_si_statement(record):
+    """Generate a statement to add agent to Snowflake Intelligence if not already added."""
+    db = record.get("database_name", "").strip()
+    schema = record.get("schema_name", "").strip()
+    base_name = record.get("name", "").strip()
+    full_name = f"{db}.{schema}.{base_name}"
+
+    lines = [
+        f"-- Add {base_name} to Snowflake Intelligence if not already present",
+        "DECLARE",
+        "  agent_exists BOOLEAN := FALSE;",
+        "BEGIN",
+        "  SELECT COUNT(*) > 0 INTO :agent_exists",
+        "  FROM TABLE(RESULT_SCAN(LAST_QUERY_ID(-1)))",
+        "  WHERE \"name\" = UPPER('{base_name}');".format(base_name=base_name),
+        "",
+        "  IF (NOT agent_exists) THEN",
+        f"    ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT ADD AGENT {full_name};",
+        "  END IF;",
+        "END;",
+    ]
 
     return "\n".join(lines)
 
@@ -62,7 +83,9 @@ def main():
     parser.add_argument("-i", "--input", default="tasks/agent/json/describe_agent_output.json",
                         help="Input JSON file path")
     parser.add_argument("-o", "--output", default="agents.sql",
-                        help="Output SQL file path")
+                        help="Output SQL file path for CREATE AGENT statements")
+    parser.add_argument("--si-output", default=None,
+                        help="Output SQL file path for ADD AGENT to Snowflake Intelligence (default: derived from -o)")
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -72,14 +95,33 @@ def main():
 
     data = json.loads(input_path.read_text(encoding="utf-8"))
 
-    statements = []
+    # Generate CREATE AGENT statements
+    create_statements = []
     for record in data:
         stmt = render_agent_statement(record)
-        statements.append(stmt)
+        create_statements.append(stmt)
 
     output_path = Path(args.output)
-    output_path.write_text("\n\n".join(statements) + "\n", encoding="utf-8")
-    print(f"Generated {len(statements)} statement(s) in {output_path}")
+    output_path.write_text("\n\n".join(create_statements) + "\n", encoding="utf-8")
+    print(f"Generated {len(create_statements)} CREATE AGENT statement(s) in {output_path}")
+
+    # Generate ADD AGENT to Snowflake Intelligence script
+    si_output_path = Path(args.si_output) if args.si_output else output_path.parent / "add_agents_to_si.sql"
+    
+    si_lines = [
+        "-- Script to add agents to Snowflake Intelligence (idempotent)",
+        "-- First, show existing agents in the SI object to check membership",
+        "SHOW AGENTS IN SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;",
+        "",
+    ]
+    
+    for record in data:
+        stmt = render_add_agent_to_si_statement(record)
+        si_lines.append(stmt)
+        si_lines.append("")
+
+    si_output_path.write_text("\n".join(si_lines), encoding="utf-8")
+    print(f"Generated ADD AGENT to SI script in {si_output_path}")
 
 
 if __name__ == "__main__":
