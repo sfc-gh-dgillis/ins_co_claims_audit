@@ -201,7 +201,7 @@ ALTER USER ga_dev SET NETWORK_POLICY = github_actions_ingress;
 
 After completing the admin persona steps above, configure the environment for engineer persona demo deployment. This uses a different connection (the service user created in Step 3) with standard privileges.
 
-### 1. Configure Demo Environment File
+### Configure Demo Environment File
 
 Create a `.env/demo.env` file based on the provided template. This is used by the regular demo users (not the elevated admin user):
 
@@ -245,7 +245,7 @@ STREAMLIT_APP_DIR=streamlit
 DOTENV_FILENAME=custom.env task demo-up
 ```
 
-### 3. Configure Snowflake CLI Connection
+### Configure Snowflake CLI Connection
 
 Ensure your Snowflake CLI is configured with a valid connection profile for your service user that matches `CLI_CONNECTION_NAME`:
 
@@ -534,7 +534,7 @@ The CI/CD pipeline automatically deploys the demo to Snowflake when changes are 
 
 The workflow is defined in `.github/workflows/ci.yml` and performs the following steps:
 
-#### 1. Trigger Events
+#### Trigger Events
 
 The workflow runs on:
 
@@ -542,7 +542,7 @@ The workflow runs on:
 - **Pull request events** targeting `main` or `dgillis-dev` branches
 - **Manual triggers** via the GitHub Actions `workflow_dispatch` event
 
-#### 2. Deployment Steps
+#### Deployment Steps
 
 The GitHub Actions workflow executes these steps:
 
