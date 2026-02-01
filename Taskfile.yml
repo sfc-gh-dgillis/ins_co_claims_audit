@@ -20,9 +20,9 @@ tasks:
       - task: python:create-venv
       - task: python:install-packages
 
-  demo-init-1:
+  demo-init:
     desc: |
-      Usage: `task demo-init` will initialize prerequisite objects needed for the demo. In this case, creating the warehouse, roles, database and schema. This task must be run by a user with the SYSADMIN and USERADMIN roles.
+      Usage: `task demo-init` will initialize prerequisite objects needed for the demo. In this case, creating the warehouse, roles, database, schema, and grants. This task must be run by a user with the SYSADMIN, USERADMIN, and SECURITYADMIN roles.
     cmds:
       - task: validate-prerequisites:snowcli
         silent: true
@@ -30,18 +30,6 @@ tasks:
       - task: snow-cli:sort-and-process-sql-folder
         vars:
           SQL_SORT_PROCESS_DIR: sql/batch-0
-          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
-
-  demo-init-2:
-    desc: |
-      Usage: `task demo-init-2` will issue the grants 
-    cmds:
-      - task: validate-prerequisites:snowcli
-        silent: true
-
-      - task: snow-cli:sort-and-process-sql-folder
-        vars:
-          SQL_SORT_PROCESS_DIR: sql/batch-1
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
 
