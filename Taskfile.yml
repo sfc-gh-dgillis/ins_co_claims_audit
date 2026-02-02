@@ -32,7 +32,6 @@ tasks:
           SQL_SORT_PROCESS_DIR: sql/batch-0
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
-
   demo-up:
     desc: |
       Usage: `task demo-up` if using the default demo.env file. Use `DOTENV_FILENAME=custom.env task demo-up`
@@ -58,10 +57,6 @@ tasks:
           SQL_SORT_PROCESS_DIR: sql/batch-2
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
-      - task: snow-cli:generate-agent-sql
-        vars:
-          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
-
       - task: snow-cli:create-agent
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
@@ -69,6 +64,24 @@ tasks:
       - task: snow-cli:deploy-streamlit-app
         vars:
           STREAMLIT_APP_DIR: $STREAMLIT_APP_DIR
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+  update-agents:
+    desc: |
+      Usage: `task update-agents` will regenerate the agent SQL from what is stored in the database. It
+        will then update the agent with the new SQL. This is useful if you have made changes to the agent
+        in the UI and want to sync those changes back to your local files for version control.
+
+    cmds:
+      - task: validate-prerequisites:snowcli
+        silent: true
+
+      - task: snow-cli:generate-agent-sql
+        vars:
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+      - task: snow-cli:create-agent
+        vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
   demo-down:
