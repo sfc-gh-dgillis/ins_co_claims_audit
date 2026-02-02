@@ -199,7 +199,7 @@ ALTER USER ga_dev SET NETWORK_POLICY = github_actions_ingress;
 
 ### Persona: Admin & Engineer
 
-After completing the admin persona steps above, configure the environment for engineer persona demo deployment. This uses a different connection (the service user created in Step 3) with standard privileges.
+After completing the admin persona steps above, configure the environment for engineer persona demo deployment. This uses a different connection (the service user created in Step 2) with standard privileges.
 
 ### Configure Demo Environment File
 
@@ -255,7 +255,7 @@ snow connection test --connection your_service_user_connection_name
 
 ## Demo Deployment
 
-**Prerequisites:** Admin setup (Steps 1-3 above) must be completed first.
+**Prerequisites:** Admin setup (Steps 1-2 above) must be completed first.
 
 After the admin has completed the one-time initialization (`demo-init`), both admin and engineer personas can run the demo-up task to deploy the demo application.
 
@@ -505,10 +505,28 @@ task snow-cli:deploy-streamlit-app \
 
 ### Customizing the Agent
 
-The agent configuration is stored in `tasks/snow-cli/agent/sql/create_agents.sql`. To modify:
+The agent configuration is managed through:
+- **Input**: `tasks/snow-cli/agent/input/agents.json` - Array of agent names to process
+- **Output**: `tasks/snow-cli/agent/output/` - Generated SQL files per agent
 
-1. Make changes to the agent specification
-2. Run: `task snow-cli:create-agent`
+To modify an agent:
+
+1. Make changes to the agent in Snowsight UI
+2. Run: `task update-agents` to sync changes back to local files
+3. Commit the updated SQL files to version control
+
+### Syncing Agent Changes from UI
+
+If you modify the agent in Snowsight and want to sync changes back to version control:
+
+```bash
+task update-agents
+```
+
+This task:
+1. Runs `DESCRIBE AGENT` for each agent in `agents.json`
+2. Generates updated `_create_agent.sql` and `_add_agent_to_si.sql` files
+3. Deploys the agent with the regenerated SQL
 
 ### Updating the Streamlit App
 
@@ -730,8 +748,9 @@ If the Streamlit app doesn't deploy:
 │   │   │   ├── batch-1/                # Schema: tables and stages (Admin)
 │   │   │   └── batch-2/                # Data & AI: DML, Cortex services, functions (Engineer)
 │   │   ├── agent/
-│   │   │   └── sql/
-│   │   │       └── create_agents.sql   # Agent configuration (Engineer)
+│   │   │   ├── input/
+│   │   │   │   └── agents.json         # Array of agent names to process
+│   │   │   └── output/                 # Generated SQL files per agent (Engineer)
 │   │   ├── streamlit/
 │   │   │   ├── streamlit_app.py        # Streamlit application (Engineer)
 │   │   │   └── environment.yml         # Python dependencies
@@ -814,7 +833,10 @@ Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
 
 ### Step 5: Deploy the Agent
 
-Run `tasks/snow-cli/agent/sql/create_agents.sql` to create the Claims Audit Agent.
+Run the generated agent SQL files in `tasks/snow-cli/agent/output/`:
+
+1. `claims_audit_agent_create_agent.sql` - Creates the agent
+2. `claims_audit_agent_add_agent_to_si.sql` - Adds agent to Snowflake Intelligence (optional)
 
 ### Step 6: Deploy the Interface
 
