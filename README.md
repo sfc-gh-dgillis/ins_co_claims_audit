@@ -42,7 +42,7 @@ This demo is designed for two distinct personas:
 - Custom functions and procedures deployment
 - Infrastructure and security setup
 
-**Handles:** Batch-0 (infrastructure and grants) and Batch-2 (schema objects) SQL deployments
+**Handles:** Batch-0 (infrastructure and grants) and Batch-1 (schema objects) SQL deployments
 
 ### AI Engineer Persona
 
@@ -50,7 +50,7 @@ This demo is designed for two distinct personas:
 
 **Responsibilities:**
 
-- Data population and transformation (Batch-3)
+- Data population and transformation (Batch-2)
 - Cortex AI services configuration
 - Semantic model development
 - Agent configuration and deployment
@@ -58,7 +58,7 @@ This demo is designed for two distinct personas:
 - Testing and iterating on agent behavior
 - Application-level customizations
 
-**Handles:** Batch-3 SQL deployments (data & AI services), Agent creation, and Streamlit deployment
+**Handles:** Batch-2 SQL deployments (data & AI services), Agent creation, and Streamlit deployment
 
 ## Prerequisites
 
@@ -269,11 +269,11 @@ task demo-up
 
 This command executes the following steps in sequence:
 
-**Admin Responsibilities (Batch-2):**
+**Admin Responsibilities (Batch-1):**
 
 1. **Validate Prerequisites** - Verify that Snowflake CLI is properly installed and configured
 
-2. **Create Tables and Stages (Batch-2)** - Execute SQL files in `sql/batch-2/`:
+2. **Create Tables and Stages (Batch-1)** - Execute SQL files in `sql/batch-1/`:
    - Create all required tables (CLAIMS, CLAIM_LINES, FINANCIAL_TRANSACTIONS, AUTHORIZATION, INVOICES, etc.)
    - Create chunk tables for notes and guidelines
    - Create the `LOSS_EVIDENCE` internal stage for file storage
@@ -285,9 +285,9 @@ This command executes the following steps in sequence:
    - Invoices (PNG)
    - Call recordings (WAV)
 
-**Engineer Responsibilities (Batch-3 + Applications):**
+**Engineer Responsibilities (Batch-2 + Applications):**
 
-1. **Create Cortex Services and Data (Batch-3)** - Execute SQL files in `sql/batch-3/`:
+1. **Create Cortex Services and Data (Batch-2)** - Execute SQL files in `sql/batch-2/`:
    - Refresh and populate the stage
    - Insert sample data into tables (DML operations)
    - Create Cortex Search services for claim notes and guidelines
@@ -308,8 +308,8 @@ This command executes the following steps in sequence:
 |------|---------|----------|------------------------------|--------------------------------|
 | 1    | Batch-0 | Admin    | Infrastructure & Grants      | One-time (elevated privileges) |
 | 2    | N/A     | Admin    | User creation                | One-time (manual)              |
-| 3    | Batch-2 | Admin    | Tables & Stages              | Per deployment                 |
-| 4    | Batch-3 | Engineer | Data & Cortex services       | Per deployment                 |
+| 3    | Batch-1 | Admin    | Tables & Stages              | Per deployment                 |
+| 4    | Batch-2 | Engineer | Data & Cortex services       | Per deployment                 |
 | 5    | N/A     | Engineer | Agent & Streamlit            | Per deployment                 |
 
 ### What Gets Created
@@ -462,11 +462,11 @@ DOTENV_FILENAME=demo_init.env task demo-init
 
 Note: This requires SYSADMIN, USERADMIN, and SECURITYADMIN roles
 
-##### Create Tables and Stages (Batch 2)
+##### Create Tables and Stages (Batch 1)
 
 ```bash
 task snow-cli:sort-and-process-sql-folder \
-  SQL_SORT_PROCESS_DIR=sql/batch-2 \
+  SQL_SORT_PROCESS_DIR=sql/batch-1 \
   CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
 ```
 
@@ -481,11 +481,11 @@ task snow-cli:upload-files-to-internal-named-stage \
 
 #### Engineer Tasks (Data & AI Services)
 
-##### Process Data and Create Cortex Services (Batch 3)
+##### Process Data and Create Cortex Services (Batch 2)
 
 ```bash
 task snow-cli:sort-and-process-sql-folder \
-  SQL_SORT_PROCESS_DIR=sql/batch-3 \
+  SQL_SORT_PROCESS_DIR=sql/batch-2 \
   CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
 ```
 
@@ -727,8 +727,8 @@ If the Streamlit app doesn't deploy:
 │   │   ├── snowcli-tasks.yml           # Snowflake CLI task definitions
 │   │   ├── sql/
 │   │   │   ├── batch-0/                # Infrastructure & Security: warehouses, roles, db/schema, grants (Admin)
-│   │   │   ├── batch-2/                # Schema: tables and stages (Admin)
-│   │   │   └── batch-3/                # Data & AI: DML, Cortex services, functions (Engineer)
+│   │   │   ├── batch-1/                # Schema: tables and stages (Admin)
+│   │   │   └── batch-2/                # Data & AI: DML, Cortex services, functions (Engineer)
 │   │   ├── agent/
 │   │   │   └── sql/
 │   │   │       └── create_agents.sql   # Agent configuration (Engineer)
@@ -782,9 +782,9 @@ Run the scripts in `tasks/snow-cli/sql/batch-0/` in order:
 
 **Note:** Requires SYSADMIN, USERADMIN, and SECURITYADMIN roles.
 
-### Step 2: Create Tables and Stages (Batch-2)
+### Step 2: Create Tables and Stages (Batch-1)
 
-Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
+Run the scripts in `tasks/snow-cli/sql/batch-1/` in order:
 
 1. `001-table_ddl.sql` - Creates all tables (claims, claim_lines, financial_transactions, authorization, invoices, parsed_claim_notes, parsed_guidelines, parsed_invoices, notes_chunk_table, guidelines_chunk_table, notes_chunk_table_def, guidelines_chunk_table_def)
 2. `002-stages.sql` - Creates the `loss_evidence` stage
@@ -801,9 +801,9 @@ Upload the following files from `upload/` to the `loss_evidence` stage:
 - `Gemini_Generated3.jpeg`
 - `ins_co_1899_call.wav`
 
-### Step 4: Data and Cortex Services (Batch-3)
+### Step 4: Data and Cortex Services (Batch-2)
 
-Run the scripts in `tasks/snow-cli/sql/batch-3/` in order:
+Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
 
 1. `003-refresh_stage.sql` - Refresh stage directory
 2. `004-table_dml.sql` - Insert sample data
