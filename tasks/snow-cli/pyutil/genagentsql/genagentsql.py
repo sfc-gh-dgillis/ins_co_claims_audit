@@ -2,8 +2,26 @@
 
 import argparse
 import json
-from pathlib import Path
+import subprocess
 import sys
+from pathlib import Path
+
+
+def describe_agent(connection_name: str, agent_name: str) -> dict:
+    """Run DESCRIBE AGENT and return the result as a dict."""
+    cmd = [
+        'snow', 'sql', '-c', connection_name,
+        '--query', f'DESCRIBE AGENT {agent_name}',
+        '--format', 'JSON_EXT'
+    ]
+    
+    result = subprocess.run(cmd, capture_output=True, text=True, check=True)
+    data = json.loads(result.stdout)
+    
+    if not data or not isinstance(data, list) or len(data) == 0:
+        raise ValueError(f"No data returned for agent: {agent_name}")
+    
+    return data[0]
 
 
 def render_agent_statement(record):
@@ -60,32 +78,32 @@ def render_add_agent_to_si_statement(record):
     base_name = record.get("name", "").strip()
     full_name = f"{db}.{schema}.{base_name}"
 
+    # Use EXECUTE IMMEDIATE with TRY/CATCH - if agent already exists, the error is caught and ignored
     lines = [
-        f"-- Add {base_name} to Snowflake Intelligence if not already present",
-        "DECLARE",
-        "  agent_exists BOOLEAN := FALSE;",
+        f"-- Add {base_name} to Snowflake Intelligence (idempotent - ignores if already added)",
+        "EXECUTE IMMEDIATE",
+        "$$",
         "BEGIN",
-        "  SELECT COUNT(*) > 0 INTO :agent_exists",
-        "  FROM TABLE(RESULT_SCAN(LAST_QUERY_ID(-1)))",
-        "  WHERE \"name\" = UPPER('{base_name}');".format(base_name=base_name),
-        "",
-        "  IF (NOT agent_exists) THEN",
-        f"    ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT ADD AGENT {full_name};",
-        "  END IF;",
+        f"  ALTER SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT ADD AGENT {full_name};",
+        "EXCEPTION",
+        "  WHEN OTHER THEN",
+        "    -- Agent already exists in SI, ignore the error",
+        "    NULL;",
         "END;",
+        "$$;",
     ]
 
     return "\n".join(lines)
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate SQL from describe_agent_output.json")
-    parser.add_argument("-i", "--input", default="tasks/agent/json/describe_agent_output.json",
-                        help="Input JSON file path")
-    parser.add_argument("-o", "--output", default="agents.sql",
-                        help="Output SQL file path for CREATE AGENT statements")
-    parser.add_argument("--si-output", default=None,
-                        help="Output SQL file path for ADD AGENT to Snowflake Intelligence (default: derived from -o)")
+    parser = argparse.ArgumentParser(description="Generate SQL files from agents.json")
+    parser.add_argument("-i", "--input", default="agent/input/agents.json",
+                        help="Input JSON file with array of agent names (default: agent/input/agents.json)")
+    parser.add_argument("-o", "--output-dir", default="agent/output",
+                        help="Output directory for SQL files (default: agent/output)")
+    parser.add_argument("-c", "--connection", required=True,
+                        help="Snowflake CLI connection name")
     args = parser.parse_args()
 
     input_path = Path(args.input)
@@ -93,35 +111,53 @@ def main():
         print(f"Error: Input file not found: {input_path}", file=sys.stderr)
         sys.exit(1)
 
-    data = json.loads(input_path.read_text(encoding="utf-8"))
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    # Generate CREATE AGENT statements
-    create_statements = []
-    for record in data:
-        stmt = render_agent_statement(record)
-        create_statements.append(stmt)
+    agent_names = json.loads(input_path.read_text(encoding="utf-8"))
 
-    output_path = Path(args.output)
-    output_path.write_text("\n\n".join(create_statements) + "\n", encoding="utf-8")
-    print(f"Generated {len(create_statements)} CREATE AGENT statement(s) in {output_path}")
+    if not isinstance(agent_names, list):
+        print("Error: Input JSON must be an array of agent names", file=sys.stderr)
+        sys.exit(1)
 
-    # Generate ADD AGENT to Snowflake Intelligence script
-    si_output_path = Path(args.si_output) if args.si_output else output_path.parent / "add_agents_to_si.sql"
-    
-    si_lines = [
-        "-- Script to add agents to Snowflake Intelligence (idempotent)",
-        "-- First, show existing agents in the SI object to check membership",
-        "SHOW AGENTS IN SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT;",
-        "",
-    ]
-    
-    for record in data:
-        stmt = render_add_agent_to_si_statement(record)
-        si_lines.append(stmt)
-        si_lines.append("")
+    for agent_name in agent_names:
+        if not isinstance(agent_name, str) or not agent_name.strip():
+            print(f"Warning: Skipping invalid agent name: {agent_name}", file=sys.stderr)
+            continue
 
-    si_output_path.write_text("\n".join(si_lines), encoding="utf-8")
-    print(f"Generated ADD AGENT to SI script in {si_output_path}")
+        agent_name = agent_name.strip()
+        print(f"Describing agent: {agent_name}")
+        
+        try:
+            record = describe_agent(args.connection, agent_name)
+        except subprocess.CalledProcessError as e:
+            print(f"Error describing agent {agent_name}: {e.stderr}", file=sys.stderr)
+            sys.exit(1)
+        except ValueError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Use lowercase for filenames
+        agent_name_lower = record.get("name", agent_name).strip().lower()
+
+        # Generate CREATE AGENT SQL file
+        create_stmt = render_agent_statement(record)
+        create_file = output_dir / f"{agent_name_lower}_create_agent.sql"
+        create_file.write_text(create_stmt + "\n", encoding="utf-8")
+        print(f"  Generated {create_file}")
+
+        # Generate ADD AGENT to SI SQL file
+        si_stmt = render_add_agent_to_si_statement(record)
+        si_lines = [
+            "-- Script to add agent to Snowflake Intelligence (idempotent)",
+            "",
+            si_stmt,
+        ]
+        si_file = output_dir / f"{agent_name_lower}_add_agent_to_si.sql"
+        si_file.write_text("\n".join(si_lines) + "\n", encoding="utf-8")
+        print(f"  Generated {si_file}")
+
+    print(f"\nGenerated SQL files for {len(agent_names)} agent(s) in {output_dir}")
 
 
 if __name__ == "__main__":

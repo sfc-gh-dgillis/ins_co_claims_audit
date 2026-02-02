@@ -22,18 +22,15 @@ tasks:
     cmds:
       - snow sql --connection "{{.CLI_CONNECTION_NAME}}" --query "DROP DATABASE IF EXISTS {{.DEMO_DATABASE_NAME}};"
 
-  desc-agent:
-    desc: Executes describe agent sql and sends output to a file.
+  generate-agent-sql:
+    desc: Describes agents and generates SQL files for each agent from agent/input/agents.json.
     cmds:
-      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/sql/desc-agent.sql --format=JSON_EXT > agent/json/describe_agent_output.json
-
-  generate-create-agent-sql-from-desc-agent-output:
-    desc: Creates create_agents.sql file from describe_agent_output.json.
-    cmds:
-      - python3 pyutil/genagentsql/genagentsql.py -i agent/json/describe_agent_output.json -o agent/sql/create_agents.sql
+      - python3 pyutil/genagentsql/genagentsql.py -i agent/input/agents.json -o agent/output -c "{{.CLI_CONNECTION_NAME}}"
 
   create-agent:
-    desc: Creates agents from create_agents.sql file and adds them to Snowflake Intelligence.
+    desc: Creates agents and adds them to Snowflake Intelligence.
+    vars:
+      AGENT_NAME: '{{.AGENT_NAME | default "claims_audit_agent"}}'
     cmds:
-      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/sql/create_agents.sql
-      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/sql/add_agents_to_si.sql
+      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/output/{{.AGENT_NAME}}_create_agent.sql
+      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f agent/output/{{.AGENT_NAME}}_add_agent_to_si.sql
