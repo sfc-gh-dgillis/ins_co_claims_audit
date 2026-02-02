@@ -58,11 +58,9 @@ tasks:
           SQL_SORT_PROCESS_DIR: sql/batch-3
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
-      - task: snow-cli:desc-agent
+      - task: snow-cli:generate-agent-sql
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
-
-      - task: snow-cli:generate-create-agent-sql-from-desc-agent-output
 
       - task: snow-cli:create-agent
         vars:
