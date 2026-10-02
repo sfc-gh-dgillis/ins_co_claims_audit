@@ -8,8 +8,42 @@ Sorts and executes SQL files with numeric prefixes (e.g., 001-schema.sql)
 import re
 import subprocess
 import sys
+import threading
+import time
 from pathlib import Path
 from typing import List, Tuple
+
+
+class Spinner:
+    """A simple spinner to show progress during long-running operations."""
+    
+    def __init__(self, message: str = "Processing"):
+        self.message = message
+        self.spinning = False
+        self.thread = None
+        self.frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"]
+        self.current_frame = 0
+    
+    def _spin(self):
+        while self.spinning:
+            frame = self.frames[self.current_frame % len(self.frames)]
+            sys.stdout.write(f"\r{frame} {self.message}...")
+            sys.stdout.flush()
+            self.current_frame += 1
+            time.sleep(0.1)
+    
+    def start(self):
+        self.spinning = True
+        self.thread = threading.Thread(target=self._spin)
+        self.thread.start()
+    
+    def stop(self, success: bool = True):
+        self.spinning = False
+        if self.thread:
+            self.thread.join()
+        symbol = "✓" if success else "✗"
+        sys.stdout.write(f"\r{symbol} {self.message}{'... done' if success else '... failed'}\n")
+        sys.stdout.flush()
 
 
 def extract_numeric_prefix(filename: str) -> int:
@@ -74,7 +108,8 @@ def get_sorted_sql_files(directory: str, pattern: str = r'^\d+-.*\.sql$') -> Tup
 def execute_sql_files_with_snowflake_cli(
     connection_name: str,
     sql_files: List[Path],
-    verbose: bool = True
+    verbose: bool = True,
+    show_spinner: bool = True
 ) -> bool:
     """
     Execute SQL files using Snowflake CLI in a single command.
@@ -83,6 +118,7 @@ def execute_sql_files_with_snowflake_cli(
         connection_name: Snowflake CLI connection name
         sql_files: List of SQL file paths to execute (in order)
         verbose: Print execution details
+        show_spinner: Show a spinner while processing
         
     Returns:
         True if all files executed successfully, False otherwise
@@ -91,9 +127,8 @@ def execute_sql_files_with_snowflake_cli(
         print("No SQL files to execute.")
         return True
     
+    spinner = None
     try:
-        # Build command with multiple -f flags
-        # Command: snow sql -c <connection_name> -f file1.sql -f file2.sql ...
         cmd = ['snow', 'sql', '-c', connection_name]
         
         for sql_file in sql_files:
@@ -111,12 +146,19 @@ def execute_sql_files_with_snowflake_cli(
                 print(f"    -f {sql_file} \\")
             print()
         
+        if show_spinner:
+            spinner = Spinner(f"Executing {len(sql_files)} SQL file(s)")
+            spinner.start()
+        
         result = subprocess.run(
             cmd,
             capture_output=True,
             text=True,
             check=True
         )
+        
+        if spinner:
+            spinner.stop(success=True)
         
         if verbose:
             if result.stdout:
@@ -132,6 +174,8 @@ def execute_sql_files_with_snowflake_cli(
         return True
             
     except subprocess.CalledProcessError as e:
+        if spinner:
+            spinner.stop(success=False)
         error_msg = f"\n{'='*60}\n✗ Failed to execute SQL files\n{'='*60}"
         print(error_msg, file=sys.stderr)
         print(f"Error code: {e.returncode}", file=sys.stderr)
@@ -143,6 +187,8 @@ def execute_sql_files_with_snowflake_cli(
         return False
             
     except FileNotFoundError:
+        if spinner:
+            spinner.stop(success=False)
         print("\n" + "="*60, file=sys.stderr)
         print("ERROR: 'snow' command not found.", file=sys.stderr)
         print("Please ensure Snowflake CLI is installed.", file=sys.stderr)
