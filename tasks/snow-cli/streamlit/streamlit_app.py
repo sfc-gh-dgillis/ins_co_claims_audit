@@ -15,7 +15,7 @@ import os
 from typing import Dict, List, Optional, Tuple
 
 # Snowflake-specific imports
-import _snowflake  # Required for Snow API requests and file URLs in Streamlit in Snowflake
+import requests
 from snowflake.snowpark.context import get_active_session
 from snowflake.snowpark.exceptions import SnowparkSQLException
 
@@ -28,6 +28,8 @@ st.set_page_config(layout="wide", page_title="Insurance Claim Audit POC")
 # Constants for Cortex Analyst API
 API_ENDPOINT = "/api/v2/cortex/analyst/message"
 API_TIMEOUT = 60000  # in milliseconds
+# Must be a model AI_COMPLETE accepts for image input.
+IMAGE_MODEL = "claude-sonnet-4-6"
 
 # Configuration for Snowflake objects
 AVAILABLE_SEMANTIC_MODELS_PATHS = [
@@ -140,28 +142,32 @@ def get_analyst_response(messages: List[Dict]) -> Tuple[Optional[Dict], Optional
         "messages": messages,
         "semantic_model_file": f"@{st.session_state.selected_semantic_model_path}",
     }
+    # The container runtime has no _snowflake module, so call the REST API
+    # directly, authenticating with the Snowpark session's own token.
+    host = os.environ.get("SNOWFLAKE_HOST") or session.connection.host
+    headers = {
+        "Authorization": f'Snowflake Token="{session.connection.rest.token}"',
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
     try:
         with st.spinner("Waiting for Analyst's response..."):
-            resp = _snowflake.send_snow_api_request(
-                "POST",  # method
-                API_ENDPOINT,  # path
-                {},  # headers
-                {},  # params
-                request_body,  # body
-                None,  # request_guid
-                API_TIMEOUT  # timeout
+            resp = requests.post(
+                f"https://{host}{API_ENDPOINT}",
+                headers=headers,
+                json=request_body,
+                timeout=API_TIMEOUT / 1000,  # requests expects seconds
             )
-        parsed_content = json.loads(resp["content"])
-        if resp["status"] < 400:
+        parsed_content = resp.json()
+        if resp.status_code < 400:
             return parsed_content, None
         else:
-            error_msg = f"API Error (Code: {resp['status']}): {parsed_content.get('message', 'Unknown error')}"
+            error_msg = f"API Error (Code: {resp.status_code}): {parsed_content.get('message', 'Unknown error')}"
             return parsed_content, error_msg
     except Exception as e:
         return None, f"An unexpected error occurred during the API call: {e}"
 
 
-@st.cache_data(ttl=3600)
 def get_image_from_stage(stage_name: str, file_name: str) -> Optional[bytes]:
     """
     Downloads an image file from a Snowflake stage to a temporary local directory,
@@ -204,7 +210,7 @@ def get_image_summary(image_file: str, stage: str) -> str:
     """Uses Snowflake Cortex to generate a summary for an image in a stage."""
     prompt = "Summarize the key insights from the attached image in 100 words."
     sql_query = f"""
-    SELECT SNOWFLAKE.CORTEX.COMPLETE('claude-3-5-sonnet',
+    SELECT AI_COMPLETE('{IMAGE_MODEL}',
         '{prompt}',
         TO_FILE('@{stage}/{image_file}'));
     """
@@ -226,7 +232,7 @@ def get_similarity_score(text1: str, text2: str) -> Optional[float]:
     """Calculates the AI_SIMILARITY score between two text inputs."""
     # The AI_SIMILARITY function is called directly with the input strings.
     sql_query = f"""
-    SELECT SNOWFLAKE.CORTEX.AI_SIMILARITY(
+    SELECT AI_SIMILARITY(
         '{text1.replace("'", "''")}',
         '{text2.replace("'", "''")}'
     );

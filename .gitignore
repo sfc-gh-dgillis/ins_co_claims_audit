@@ -44,3 +44,5 @@ __pycache__/
 
 # Streamlit output directory
 tasks/snow-cli/streamlit/output
+# Generated from tasks/snow-cli/streamlit/templates/snowflake_yml_template.yml
+tasks/snow-cli/streamlit/snowflake.yml

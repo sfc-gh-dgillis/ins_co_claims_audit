@@ -1,0 +1,26 @@
+definition_version: 2
+
+# Template for streamlit/snowflake.yml — rendered by cmd/generate-streamlit-project.sh.
+# Edit this file, not the generated one.
+#
+# Notes:
+#   * runtime_name + compute_pool select the container runtime (warehouse runtime
+#     is the legacy option). query_warehouse still runs the app's SQL.
+#   * Python dependencies live in pyproject.toml and are installed from Snowflake's
+#     built-in PyPI mirror, attached post-deploy in sql/batch-3, so no external
+#     access integration is needed.
+entities:
+  ins_co_claims_audit_streamlit:
+    type: streamlit
+    identifier:
+      name: {{ streamlit_name }}
+      database: {{ database_name }}
+      schema: {{ schema_name }}
+    query_warehouse: {{ warehouse_name }}
+    runtime_name: SYSTEM$ST_CONTAINER_RUNTIME_PY3_11
+    compute_pool: {{ compute_pool }}
+    main_file: streamlit_app.py
+    stage: {{ database_name }}.{{ schema_name }}.{{ streamlit_stage_name }}
+    artifacts:
+      - streamlit_app.py
+      - pyproject.toml

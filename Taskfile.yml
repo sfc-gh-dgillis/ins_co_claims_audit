@@ -61,9 +61,18 @@ tasks:
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
+      - task: snow-cli:generate-streamlit-project
+        vars:
+          STREAMLIT_APP_DIR: $STREAMLIT_APP_DIR
+
       - task: snow-cli:deploy-streamlit-app
         vars:
           STREAMLIT_APP_DIR: $STREAMLIT_APP_DIR
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+      - task: snow-cli:sort-and-process-sql-folder
+        vars:
+          SQL_SORT_PROCESS_DIR: sql/batch-3
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
   update-agents:

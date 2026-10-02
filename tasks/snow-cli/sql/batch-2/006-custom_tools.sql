@@ -48,7 +48,7 @@ CREATE OR REPLACE FUNCTION INS_CO.LOSS_CLAIMS.GET_IMAGE_SUMMARY(p_file_name VARC
   AS
   $$
     SELECT AI_COMPLETE(
-                   'claude-3-5-sonnet',
+                   'claude-sonnet-4-6',
                    'Summarize the key insights from the attached image in 100 words.',
                    to_file(p_stage_name, p_file_name)
            )

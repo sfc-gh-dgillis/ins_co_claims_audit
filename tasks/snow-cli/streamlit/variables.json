@@ -1,0 +1,29 @@
+{
+  "description": "Maps {{ placeholder }} names in templates/snowflake_yml_template.yml to environment variables from .env/demo.env. A missing env var with no default is a hard error.",
+  "snowflake_yml_template": "templates/snowflake_yml_template.yml",
+  "variables": {
+    "database_name": {
+      "env": "DEMO_DATABASE_NAME"
+    },
+    "schema_name": {
+      "env": "DEMO_SCHEMA_ONLY_NAME",
+      "default": "loss_claims"
+    },
+    "warehouse_name": {
+      "env": "DEMO_WAREHOUSE_NAME",
+      "default": "demo_s_wh"
+    },
+    "streamlit_name": {
+      "env": "DEMO_STREAMLIT_NAME",
+      "default": "ins_co_claims_audit_streamlit"
+    },
+    "streamlit_stage_name": {
+      "env": "DEMO_STREAMLIT_STAGE_NAME",
+      "default": "streamlit_deploy_stage"
+    },
+    "compute_pool": {
+      "env": "DEMO_COMPUTE_POOL",
+      "default": "SYSTEM_COMPUTE_POOL_CPU"
+    }
+  }
+}

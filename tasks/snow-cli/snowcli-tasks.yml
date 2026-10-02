@@ -12,10 +12,17 @@ tasks:
     cmds:
       - python3 pyutil/snowcliput/snowcliput.py "{{.FILE_UPLOAD_DIR}}" "{{.CLI_CONNECTION_NAME}}" "{{.INTERNAL_NAMED_STAGE}}"
 
-  deploy-streamlit-app:
-    desc: Deploys a Streamlit app to Snowflake using the Snowflake CLI.
+  generate-streamlit-project:
+    desc: Renders the Streamlit app's snowflake.yml from templates/snowflake_yml_template.yml.
+    vars:
+      VARIABLES_FILE: '{{.VARIABLES_FILE | default "streamlit/variables.json"}}'
     cmds:
-      - snow streamlit deploy --replace --prune --open --project "{{.STREAMLIT_APP_DIR}}"
+      - cmd/generate-streamlit-project.sh "{{.VARIABLES_FILE}}" "{{.STREAMLIT_APP_DIR}}"
+
+  deploy-streamlit-app:
+    desc: Deploys the Streamlit app (container runtime) as the app owner role, then verifies it.
+    cmds:
+      - cmd/deploy-streamlit.sh "{{.STREAMLIT_APP_DIR}}"
 
   drop-database-if-exists:
     desc: Drops the specified Snowflake database if it exists using the Snowflake CLI.

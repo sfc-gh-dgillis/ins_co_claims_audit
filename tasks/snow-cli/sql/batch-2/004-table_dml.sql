@@ -53,12 +53,10 @@ WITH claim_notes_cte AS (SELECT relative_path                                   
 
 SELECT file_name                       AS filename,
        extracted_content               AS extracted_content,
-       flattened.value:answer::VARCHAR AS claim_no
-FROM claim_notes_cte c,
-     LATERAL FLATTEN(INPUT =>
-                     snowflake.cortex.extract_answer(c.extracted_content, 'What is the claim number?')) AS flattened
-WHERE flattened.value:score::NUMBER >= 0.5
-  AND file_name ILIKE '%claim_note%';
+       AI_EXTRACT(text => c.extracted_content::VARCHAR,
+                  responseFormat => {'claim_no': 'What is the claim number?'}):response:claim_no::VARCHAR AS claim_no
+FROM claim_notes_cte c
+WHERE file_name ILIKE '%claim_note%';
 
 INSERT INTO parsed_guidelines (FILENAME, EXTRACTED_CONTENT)
 WITH claim_notes_cte AS (SELECT relative_path                                                         AS file_name,
@@ -83,12 +81,10 @@ WITH claim_notes_cte AS (SELECT relative_path                                   
 
 SELECT file_name                       AS filename,
        extracted_content               AS extracted_content,
-       flattened.value:answer::VARCHAR AS claim_no
-FROM claim_notes_cte c,
-     LATERAL FLATTEN(INPUT =>
-                     snowflake.cortex.extract_answer(c.extracted_content, 'What is the claim no?')) AS flattened
-WHERE flattened.value:score::NUMBER >= 0.5
-  AND file_name ILIKE '%invoice%';
+       AI_EXTRACT(text => c.extracted_content::VARCHAR,
+                  responseFormat => {'claim_no': 'What is the claim no?'}):response:claim_no::VARCHAR AS claim_no
+FROM claim_notes_cte c
+WHERE file_name ILIKE '%invoice%';
 
 
 INSERT INTO notes_chunk_table
