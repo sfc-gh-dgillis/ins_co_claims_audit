@@ -23,7 +23,7 @@
     },
     "compute_pool": {
       "env": "DEMO_COMPUTE_POOL",
-      "default": "SYSTEM_COMPUTE_POOL_CPU"
+      "default": "INS_CO_STREAMLIT_POOL"
     }
   }
 }

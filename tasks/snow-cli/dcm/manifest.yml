@@ -1,0 +1,17 @@
+manifest_version: 2
+type: DCM_PROJECT
+
+# Declarative definitions for the INS_CO claims audit demo: warehouse, database,
+# schema, stage, tables, functions, procedures, semantic view, roles and grants.
+#
+# Objects DCM cannot DEFINE (compute pool, Cortex Search services, MCP server,
+# agent, Streamlit app) and data loading stay imperative — see pre_deploy.sql
+# and the sql/batch-* folders.
+
+default_target: DEMO
+
+targets:
+  DEMO:
+    account_identifier: SFSENORTHAMERICA-DGILLIS_AWS_USEAST1_V1
+    project_name: UTIL.DCM_PROJECT_ARCHIVE.INS_CO_CLAIMS_AUDIT
+    project_owner: ACCOUNTADMIN

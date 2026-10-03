@@ -89,12 +89,15 @@ This step creates the foundational Snowflake objects (warehouses, roles, databas
 
 **Prerequisites:**
 
-- A Snowflake user with SYSADMIN, USERADMIN, and SECURITYADMIN roles
+- A Snowflake user that can use the ACCOUNTADMIN role (the DCM project is owned by ACCOUNTADMIN)
 - A Snowflake CLI connection configured for this user
+- The `GA_DEV` and `GA_MOCK` users from Step 2 must already exist, because the project grants `INS_CO_GA_DEV` to them
+- The `UTIL.DCM_PROJECT_ARCHIVE` schema, and the DCM project registered in it (one time):
+  `snow dcm create UTIL.DCM_PROJECT_ARCHIVE.INS_CO_CLAIMS_AUDIT -c <admin_connection>`
 
-**Create the demo_init.env file:**
+**Create the demo_admin.env file:**
 
-Create a `.env/demo_init.env` file for the initialization tasks:
+Copy `.env/demo_admin.env_template` to `.env/demo_admin.env` and set the connection:
 
 ```bash
 # The Snowflake connection name configured in snow-cli for keypair authentication.
@@ -105,49 +108,22 @@ DEMO_DATABASE_NAME=ins_co
 **Run the infrastructure and grants initialization:**
 
 ```bash
-$ DOTENV_FILENAME=demo_init.env task demo-init
-Snowflake CLI (snow) is installed.
-task: [snow-cli:sort-and-process-sql-folder] python3 pyutil/snowclisp/snowclisp.py "sql/batch-0" "$CLI_CONNECTION_NAME"
-Scanning directory: sql/batch-0                                                                                                                                                                              
-
-Found 7 SQL file(s) with numeric prefix:
-  1. [001] 001-create_warehouses.sql
-  2. [002] 002-init_roles.sql
-  3. [003] 003-db_schema.sql
-  4. [004] 004-grants.sql
-  5. [005] 005-grants_cortex_ai.sql
-  6. [006] 006-grants_snowflake_intelligence.sql
-  7. [007] 007-grants_streamlit.sql
-
-Using Snowflake connection: your_admin_connection_name_here
-
-============================================================
-Executing 7 SQL file(s) in order:
-  1. 001-create_warehouses.sql
-  2. 002-init_roles.sql
-  3. 003-db_schema.sql
-  4. 004-grants.sql
-  5. 005-grants_cortex_ai.sql
-  6. 006-grants_snowflake_intelligence.sql
-  7. 007-grants_streamlit.sql
-============================================================
-...
-
-============================================================
-✓ Successfully executed all 7 SQL file(s)
-============================================================
+DOTENV_FILENAME=demo_admin.env task demo-init
 ```
 
-This executes SQL files in `sql/batch-0/`:
+`demo-init` first checks that the connection can use ACCOUNTADMIN and stops with a message if it can't
+(for example, when run with the default `demo.env`). It then deploys the DCM project in
+`tasks/snow-cli/dcm/`:
 
-- Creates the `INS_CO_WH` warehouse
-- Creates roles: `INS_CO_ADMIN` and `INS_CO_USER`
-- Creates the `INS_CO` database
-- Creates the `LOSS_CLAIMS` schema
-- Grants database and schema privileges to roles
-- Configures Cortex AI permissions
-- Sets up Cortex Search Intelligence permissions
-- Configures Streamlit deployment permissions
+1. `pre_deploy.sql` creates the `INS_CO_STREAMLIT_POOL` compute pool (DCM can't define compute pools).
+2. `snow dcm plan` prints what will be created, altered, or dropped.
+3. You're asked to confirm, then `snow dcm deploy` applies it:
+   - the `DEMO_S_WH` warehouse, the `INS_CO` database and `LOSS_CLAIMS` schema, and the `LOSS_EVIDENCE` stage
+   - the claims tables, the custom agent tool functions and procedure, and the `CA_INS_CO` semantic view
+   - the `INS_CO_CLAIMS_*` and `INS_CO_GA_DEV` roles and all grants, including Cortex, Snowflake Intelligence, and the PyPI mirror
+4. `post_deployment_grants.sql` grants USAGE on the compute pool (DCM leaves that grant out of its plan).
+
+To preview without deploying, run `DOTENV_FILENAME=demo_admin.env task snow-cli:dcm-plan`.
 
 ### Step 2: User Setup
 
@@ -454,13 +430,13 @@ You can run specific parts of the deployment individually based on your persona:
 
 #### Admin Tasks (Infrastructure & Security)
 
-##### Initialize Infrastructure and Grants (Batch 0 - Warehouses, Roles, Database, Permissions)
+##### Initialize Infrastructure and Grants (DCM project - Warehouse, Roles, Database, Tables, Permissions)
 
 ```bash
-DOTENV_FILENAME=demo_init.env task demo-init
+DOTENV_FILENAME=demo_admin.env task demo-init
 ```
 
-Note: This requires SYSADMIN, USERADMIN, and SECURITYADMIN roles
+Note: This requires a connection that can use the ACCOUNTADMIN role
 
 ##### Create Tables and Stages (Batch 1)
 
@@ -721,7 +697,7 @@ If the Streamlit app doesn't deploy:
 ├── Taskfile.yml                          # Main task definitions
 ├── .env/                                 # Environment configurations
 │   ├── demo.env                         # Demo environment variables
-│   └── demo_init.env                    # Initialization environment variables
+│   └── demo_admin.env                   # Initialization (admin) environment variables
 ├── tasks/
 │   ├── snow-cli/
 │   │   ├── snowcli-tasks.yml           # Snowflake CLI task definitions
@@ -805,12 +781,12 @@ Upload the following files from `upload/` to the `loss_evidence` stage:
 
 Run the scripts in `tasks/snow-cli/sql/batch-2/` in order:
 
-1. `003-refresh_stage.sql` - Refresh stage directory
-2. `004-table_dml.sql` - Insert sample data
-3. `005-cortex_search_services.sql` - Create Cortex Search services
-4. `006-custom_tools.sql` - Create custom functions (document parsing, image analysis, transcription, etc.)
-5. `007-semantic_views.sql` - Create semantic views for Cortex Analyst
-6. `008-create_mcp_server.sql` - Create MCP server configuration
+1. `001-refresh_stage.sql` - Refresh stage directory
+2. `002-table_dml.sql` - Insert sample data
+3. `003-cortex_search_services.sql` - Create Cortex Search services
+4. `004-create_mcp_server.sql` - Create MCP server configuration
+
+The custom functions and the semantic view are defined in the DCM project (`tasks/snow-cli/dcm/`).
 
 ### Step 5: Deploy the Agent
 

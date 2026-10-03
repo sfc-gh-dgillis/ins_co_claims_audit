@@ -1,7 +1,7 @@
-USE DATABASE ins_co;
-USE SCHEMA ins_co.loss_claims;
-
-CREATE TABLE IF NOT EXISTS claims
+-- -----------------------------------------------------------------------
+-- Tables
+-- -----------------------------------------------------------------------
+DEFINE TABLE INS_CO.LOSS_CLAIMS.CLAIMS
 (
     claim_no             VARCHAR,
     line_of_business     VARCHAR,
@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS claims
     loss_zip_code        VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS authorization
+DEFINE TABLE INS_CO.LOSS_CLAIMS.AUTHORIZATION
 (
     performer_id VARCHAR(50) PRIMARY KEY,
     from_amt     DECIMAL(18, 2),
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS authorization
     currency     VARCHAR(10)
 );
 
-CREATE TABLE IF NOT EXISTS claim_lines
+DEFINE TABLE INS_CO.LOSS_CLAIMS.CLAIM_LINES
 (
     claim_no         VARCHAR,
     line_no          INT,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS claim_lines
     performer_id     VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS financial_transactions
+DEFINE TABLE INS_CO.LOSS_CLAIMS.FINANCIAL_TRANSACTIONS
 (
     fxid           VARCHAR,
     line_no        INT,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS financial_transactions
     fin_tx_post_dt DATE
 );
 
-CREATE TABLE IF NOT EXISTS invoices
+DEFINE TABLE INS_CO.LOSS_CLAIMS.INVOICES
 (
     inv_id         VARCHAR,
     inv_line_nbr   VARCHAR,
@@ -61,8 +61,7 @@ CREATE TABLE IF NOT EXISTS invoices
     vendor         VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS
-    parsed_claim_notes
+DEFINE TABLE INS_CO.LOSS_CLAIMS.PARSED_CLAIM_NOTES
 (
     filename          VARCHAR(255),
     extracted_content VARCHAR(16777216),
@@ -70,14 +69,14 @@ CREATE TABLE IF NOT EXISTS
     claim_no          VARCHAR
 );
 
-CREATE TABLE IF NOT EXISTS parsed_guidelines
+DEFINE TABLE INS_CO.LOSS_CLAIMS.PARSED_GUIDELINES
 (
     filename          VARCHAR(255),
     extracted_content VARCHAR(16777216),
     parse_date        TIMESTAMP_NTZ DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE IF NOT EXISTS parsed_invoices
+DEFINE TABLE INS_CO.LOSS_CLAIMS.PARSED_INVOICES
 (
     filename          VARCHAR(255),
     extracted_content VARCHAR(16777216),
@@ -85,36 +84,25 @@ CREATE TABLE IF NOT EXISTS parsed_invoices
     claim_no          VARCHAR
 );
 
-CREATE OR REPLACE TABLE notes_chunk_table_def
-(
-    filename     VARCHAR,
-    claim_no     VARCHAR,
-    file_url     VARCHAR,
-    chunk        VARCHAR,
-    language_tag VARCHAR COMMENT 'The BCP 47 Language Tag which identifies a language both spoken and written.'
-);
-
-CREATE OR REPLACE TABLE guidelines_chunk_table_def
-(
-    filename VARCHAR COMMENT 'Source file name for the guideline',
-    file_url VARCHAR COMMENT 'Scoped URL to the uploaded guideline file in the loss_evidence stage',
-    chunk    VARCHAR COMMENT 'Text chunk extracted from the guideline',
-    language VARCHAR COMMENT 'Language of the guideline chunk'
-);
-
-CREATE TABLE IF NOT EXISTS loss_claims.notes_chunk_table
+DEFINE TABLE INS_CO.LOSS_CLAIMS.NOTES_CHUNK_TABLE
 (
     filename VARCHAR,
     claim_no VARCHAR,
     file_url VARCHAR,
     chunk    VARCHAR,
     language VARCHAR
-);
+)
+-- Source of a Cortex Search service. The service needs change tracking, and
+-- only the table owner (the DCM project owner) can turn it on.
+CHANGE_TRACKING = TRUE;
 
-CREATE TABLE IF NOT EXISTS loss_claims.guidelines_chunk_table
+DEFINE TABLE INS_CO.LOSS_CLAIMS.GUIDELINES_CHUNK_TABLE
 (
     filename VARCHAR,
     file_url VARCHAR,
     chunk    VARCHAR,
     language VARCHAR
-);
+)
+-- Source of a Cortex Search service. The service needs change tracking, and
+-- only the table owner (the DCM project owner) can turn it on.
+CHANGE_TRACKING = TRUE;

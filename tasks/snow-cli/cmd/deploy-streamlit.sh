@@ -5,7 +5,7 @@ set -euo pipefail
 #
 # The app is deployed AS the app owner role ($DEMO_APP_OWNER_ROLE_NAME) rather
 # than the connection's default role, so ownership is predictable and the
-# compute pool / PyPI mirror grants from sql/batch-0/007 apply.
+# compute pool / PyPI mirror grants from the DCM project (tasks/snow-cli/dcm) apply.
 #
 # Usage: ./deploy-streamlit.sh PROJECT_DIR
 

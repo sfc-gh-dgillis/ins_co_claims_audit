@@ -22,14 +22,33 @@ tasks:
 
   demo-init:
     desc: |
-      Usage: `task demo-init` will initialize prerequisite objects needed for the demo. In this case, creating the warehouse, roles, database, schema, and grants. This task must be run by a user with the SYSADMIN, USERADMIN, and SECURITYADMIN roles.
+      Usage: `task demo-init` deploys the DCM project in tasks/snow-cli/dcm (warehouse, roles, database,
+        schema, stage, tables, functions, semantic view, grants). It runs pre_deploy.sql, shows the plan,
+        asks before deploying, then applies post_deployment_grants.sql. Run it with ACCOUNTADMIN
+        (DOTENV_FILENAME=demo_admin.env task demo-init).
+    preconditions:
+      - sh: snow sql --connection "$CLI_CONNECTION_NAME" -q "USE ROLE ACCOUNTADMIN" > /dev/null 2>&1
+        msg: |
+          Connection '{{.CLI_CONNECTION_NAME}}' can't use the ACCOUNTADMIN role, which demo-init needs.
+          Run it with the admin env file instead: DOTENV_FILENAME=demo_admin.env task demo-init
     cmds:
       - task: validate-prerequisites:snowcli
         silent: true
 
-      - task: snow-cli:sort-and-process-sql-folder
+      - task: snow-cli:dcm-pre-deploy
         vars:
-          SQL_SORT_PROCESS_DIR: sql/batch-0
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+      - task: snow-cli:dcm-plan
+        vars:
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+      - task: snow-cli:dcm-deploy
+        vars:
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+      - task: snow-cli:dcm-post-deployment-grants
+        vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
   demo-up:
@@ -40,11 +59,6 @@ tasks:
     cmds:
       - task: validate-prerequisites:snowcli
         silent: true
-
-      - task: snow-cli:sort-and-process-sql-folder
-        vars:
-          SQL_SORT_PROCESS_DIR: sql/batch-1
-          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
       - task: snow-cli:upload-files-to-internal-named-stage
         vars:
