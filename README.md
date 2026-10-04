@@ -193,9 +193,6 @@ CLI_CONNECTION_NAME=your_service_user_connection_name_here
 DEMO_DATABASE_NAME=INS_CO
 DEMO_SCHEMA_NAME=INS_CO.LOSS_CLAIMS
 
-# Database name used for teardown (should match DEMO_DATABASE_NAME)
-DATABASE_NAME=INS_CO
-
 # The internal named stage used to upload files for the demo
 INTERNAL_NAMED_STAGE=@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE
 
@@ -211,7 +208,6 @@ STREAMLIT_APP_DIR=streamlit
 - This user should have the `INS_CO_USER` role granted (configured in Step 2 above)
 - `DEMO_DATABASE_NAME`: The database created by the admin (e.g., `INS_CO`)
 - `DEMO_SCHEMA_NAME`: Fully qualified schema name in format `database.schema` (e.g., `INS_CO.LOSS_CLAIMS`)
-- `DATABASE_NAME`: Used by the teardown task (should match `DEMO_DATABASE_NAME`)
 - `INTERNAL_NAMED_STAGE`: Fully qualified stage name with `@` prefix (e.g., `@INS_CO.LOSS_CLAIMS.LOSS_EVIDENCE`)
 - `FILE_UPLOAD_DIR` and `STREAMLIT_APP_DIR`: These are relative paths from the `tasks/snow-cli` directory
 
@@ -416,11 +412,19 @@ The agent can be accessed through:
 
 To completely remove the demo and all created objects:
 
+Teardown uses the DCM project, so like `demo-init` it needs ACCOUNTADMIN:
+
 ```bash
-task demo-down
+DOTENV_FILENAME=demo_admin.env task demo-teardown
 ```
 
-This will drop the database specified in `DATABASE_NAME` (configured in your `.env/demo.env` file) and all its contents (schemas, tables, stages, functions, agents, etc.).
+It runs in three steps:
+
+1. `sql/dcm-pre-purge` removes the agent from Snowflake Intelligence.
+2. `snow dcm purge` drops every object the DCM project manages: the `INS_CO` database with everything in it (tables, stage, functions, semantic view, and the search services, MCP server, agent and Streamlit app that demo-up created), the `DEMO_S_WH` warehouse, the `INS_CO_*` roles, and their grants. It asks before it runs.
+3. `sql/dcm-post-purge` drops the `INS_CO_STREAMLIT_POOL` compute pool, which DCM can't manage.
+
+The DCM project (`UTIL.DCM_PROJECT_ARCHIVE.INS_CO_CLAIMS_AUDIT`) and its deployment history are kept, so `demo-init` can redeploy into it.
 
 ## Advanced Usage
 
@@ -680,7 +684,7 @@ If the deployment fails:
 1. Check the task output for specific error messages
 2. Verify all prerequisites are met
 3. Try running individual tasks to isolate the issue
-4. Run teardown and retry: `task demo-down && task demo-up`
+4. Run teardown and retry: `DOTENV_FILENAME=demo_admin.env task demo-teardown`, then `demo-init` and `demo-up` again
 
 ### Streamlit App Issues
 

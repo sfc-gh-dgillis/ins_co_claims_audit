@@ -116,7 +116,7 @@ DOTENV_FILENAME=demo_admin.env task demo-init
 task demo-up
 
 # 3. Teardown when done
-task demo-down
+DOTENV_FILENAME=demo_admin.env task demo-teardown
 ```
 
 ### Questions to Ask User
@@ -178,8 +178,8 @@ cd /path/to/ins_co_claims_audit && DOTENV_FILENAME=demo_admin.env task demo-init
 # For demo-up  
 cd /path/to/ins_co_claims_audit && task demo-up
 
-# For demo-down (cleanup)
-cd /path/to/ins_co_claims_audit && task demo-down
+# For demo-teardown (cleanup, needs ACCOUNTADMIN)
+cd /path/to/ins_co_claims_audit && DOTENV_FILENAME=demo_admin.env task demo-teardown
 ```
 
 **Important:** These tasks can take several minutes to complete. Monitor output for errors.

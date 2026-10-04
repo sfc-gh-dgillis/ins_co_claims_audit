@@ -111,10 +111,30 @@ tasks:
 
   demo-teardown:
     desc: |
-      Usage: `task demo-down` will teardown the demo. In this case, dropping the database which is created as part of the demo.
-
+      Usage: `task demo-teardown` removes everything demo-init and demo-up created. It runs pre_purge.sql
+        (unregisters the agent from Snowflake Intelligence), asks before running `snow dcm purge` (drops the
+        database, warehouse, roles and grants the DCM project manages), then runs post_purge.sql (drops the
+        Streamlit compute pool). The DCM project itself is kept, so demo-init can redeploy into it. Run it with
+        ACCOUNTADMIN (DOTENV_FILENAME=demo_admin.env task demo-teardown).
+    preconditions:
+      - sh: snow sql --connection "$CLI_CONNECTION_NAME" -q "USE ROLE ACCOUNTADMIN" > /dev/null 2>&1
+        msg: |
+          Connection '{{.CLI_CONNECTION_NAME}}' can't use the ACCOUNTADMIN role, which demo-teardown needs.
+          Run it with the admin env file instead: DOTENV_FILENAME=demo_admin.env task demo-teardown
     cmds:
-      - task: snow-cli:drop-database-if-exists
+      - task: validate-prerequisites:snowcli
+        silent: true
+
+      - task: snow-cli:sort-and-process-sql-folder
+        vars:
+          SQL_SORT_PROCESS_DIR: sql/dcm-pre-purge
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+
+      - task: snow-cli:dcm-purge
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
-          DATABASE_NAME: $DATABASE_NAME
+
+      - task: snow-cli:sort-and-process-sql-folder
+        vars:
+          SQL_SORT_PROCESS_DIR: sql/dcm-post-purge
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME

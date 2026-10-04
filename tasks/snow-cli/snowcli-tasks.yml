@@ -15,6 +15,13 @@ tasks:
     cmds:
       - snow dcm deploy --connection "{{.CLI_CONNECTION_NAME}}" --target DEMO --alias "demo-init-$(date +%Y%m%d%H%M%S)"
 
+  dcm-purge:
+    desc: Drops every object the DCM project manages (database, warehouse, roles, grants). Keeps the project and its deployment history.
+    dir: dcm
+    prompt: Purge all objects managed by the DCM project? This drops the INS_CO database, DEMO_S_WH and the INS_CO roles.
+    cmds:
+      - snow dcm purge --connection "{{.CLI_CONNECTION_NAME}}" --target DEMO --alias "demo-teardown-$(date +%Y%m%d%H%M%S)"
+
   sort-and-process-sql-folder:
     desc: Sorts and processes all SQL files in the given directory. Sorts and executes SQL files with numeric prefixes (e.g., 001-schema.sql)
     cmds:
@@ -36,11 +43,6 @@ tasks:
     desc: Deploys the Streamlit app (container runtime) as the app owner role, then verifies it.
     cmds:
       - cmd/deploy-streamlit.sh "{{.STREAMLIT_APP_DIR}}"
-
-  drop-database-if-exists:
-    desc: Drops the specified Snowflake database if it exists using the Snowflake CLI.
-    cmds:
-      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" --query "DROP DATABASE IF EXISTS {{.DEMO_DATABASE_NAME}};"
 
   generate-agent-sql:
     desc: Describes agents and generates SQL files for each agent from agent/input/agents.json.
