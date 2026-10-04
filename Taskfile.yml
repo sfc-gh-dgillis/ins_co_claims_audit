@@ -1,11 +1,16 @@
 version: '3'
 
 includes:
-  validate-prerequisites: ./tasks/validate-prerequisites/validate-prerequisite-tasks.yml
+  validate-prerequisites:
+    taskfile: ./tasks/validate-prerequisites/validate-prerequisite-tasks.yml
+    internal: true
   snow-cli:
     taskfile: ./tasks/snow-cli/snowcli-tasks.yml
     dir: ./tasks/snow-cli
-  python: ./tasks/python/python-tasks.yml
+    internal: true
+  python:
+    taskfile: ./tasks/python/python-tasks.yml
+    internal: true
 
 env:
   ENV_DIR: .env
@@ -15,6 +20,7 @@ dotenv: ['{{ .ENV_DIR }}/{{ .DOTENV_FILENAME | default "demo.env" }}']
 tasks:
 
   python-setup-for-agents:
+    internal: true
     desc: Setup Python environment with required packages for agent tasks.
     cmds:
       - task: python:create-venv
@@ -91,9 +97,9 @@ tasks:
           SQL_SORT_PROCESS_DIR: sql/streamlit-post-deploy
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
-  update-agents:
+  sync-agents:
     desc: |
-      Usage: `task update-agents` will regenerate the agent SQL from what is stored in the database. It
+      Usage: `task sync-agents` will regenerate the agent SQL from what is stored in the database. It
         will then update the agent with the new SQL. This is useful if you have made changes to the agent
         in the UI and want to sync those changes back to your local files for version control.
 

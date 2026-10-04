@@ -71,11 +71,7 @@ Before running the demo, ensure you have:
 
 ### Validate Prerequisites
 
-You can validate that Snowflake CLI is installed correctly:
-
-```bash
-task validate-prerequisites:snowcli
-```
+`demo-init`, `demo-up` and `demo-teardown` each check that the Snowflake CLI is installed before they do anything else.
 
 ## Admin Setup (One-Time Initialization)
 
@@ -123,7 +119,7 @@ DOTENV_FILENAME=demo_admin.env task demo-init
    - the `INS_CO_CLAIMS_*` and `INS_CO_GA_DEV` roles and all grants, including Cortex, Snowflake Intelligence, and the PyPI mirror
 4. `001-dcm_post_deployment_grants.sql` grants USAGE on the compute pool (DCM leaves that grant out of its plan).
 
-To preview without deploying, run `DOTENV_FILENAME=demo_admin.env task snow-cli:dcm-plan`.
+`demo-init` shows the DCM plan and asks before it deploys, so you can answer no to just preview it.
 
 ### Step 2: User Setup
 
@@ -428,79 +424,19 @@ The DCM project (`UTIL.DCM_PROJECT_ARCHIVE.INS_CO_CLAIMS_AUDIT`) and its deploym
 
 ## Advanced Usage
 
-### Running Individual Tasks
+### Task Entry Points
 
-You can run specific parts of the deployment individually based on your persona:
+Only four tasks can be run directly: `demo-init`, `demo-up`, `demo-teardown` and `sync-agents`. Every other task (the `snow-cli:*`, `python:*` and `validate-prerequisites:*` tasks, plus `python-setup-for-agents`) is marked `internal: true`. They don't show in `task --list`, and only the entry points can call them.
 
-#### Admin Tasks (Infrastructure & Security)
-
-##### Initialize Infrastructure and Grants (DCM project - Warehouse, Roles, Database, Tables, Permissions)
-
-```bash
-DOTENV_FILENAME=demo_admin.env task demo-init
-```
-
-Note: This requires a connection that can use the ACCOUNTADMIN role
-
-##### Create Tables and Stages (Batch 1)
-
-```bash
-task snow-cli:sort-and-process-sql-folder \
-  SQL_SORT_PROCESS_DIR=sql/batch-1 \
-  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
-```
-
-##### Upload Files to Stage
-
-```bash
-task snow-cli:upload-files-to-internal-named-stage \
-  FILE_UPLOAD_DIR=$FILE_UPLOAD_DIR \
-  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME \
-  INTERNAL_NAMED_STAGE=$INTERNAL_NAMED_STAGE
-```
-
-#### Engineer Tasks (Data & AI Services)
-
-##### Process Data and Create Cortex Services (Batch 2)
-
-```bash
-task snow-cli:sort-and-process-sql-folder \
-  SQL_SORT_PROCESS_DIR=sql/batch-2 \
-  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
-```
-
-##### Create Agent Only
-
-```bash
-task snow-cli:create-agent
-```
-
-##### Deploy Streamlit App Only
-
-```bash
-task snow-cli:deploy-streamlit-app \
-  STREAMLIT_APP_DIR=$STREAMLIT_APP_DIR \
-  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
-```
+To redo a single step, such as reloading data, recreating the agent or redeploying the Streamlit app, run `task demo-up` again. Its steps are idempotent: the SQL uses `CREATE OR REPLACE`, and uploads and deploys overwrite what is there.
 
 ### Customizing the Agent
 
-The agent configuration is stored in `tasks/snow-cli/agent/sql/create_agents.sql`. To modify:
-
-1. Make changes to the agent specification
-2. Run: `task snow-cli:create-agent`
+The agent definition is in `tasks/snow-cli/agent/output/claims_audit_agent_create_agent.sql`. Edit it, then run `task demo-up` to recreate the agent. If you changed the agent in the Snowflake UI instead, run `task sync-agents`. It regenerates the local SQL from the deployed agent and recreates the agent from it, so you can commit the UI changes.
 
 ### Updating the Streamlit App
 
-To update the Streamlit app after making changes:
-
-```bash
-task snow-cli:deploy-streamlit-app \
-  STREAMLIT_APP_DIR=tasks/snow-cli/streamlit \
-  CLI_CONNECTION_NAME=$CLI_CONNECTION_NAME
-```
-
-The `--replace` flag ensures the existing app is updated.
+After changing the app in `tasks/snow-cli/streamlit`, run `task demo-up` to regenerate `snowflake.yml` and redeploy it.
 
 ## CI/CD with GitHub Actions
 
