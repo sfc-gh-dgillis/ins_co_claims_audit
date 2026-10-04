@@ -90,7 +90,7 @@ GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO R
 GRANT USAGE ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE INS_CO_CLAIMS_RO;
 GRANT MODIFY ON SNOWFLAKE INTELLIGENCE SNOWFLAKE_INTELLIGENCE_OBJECT_DEFAULT TO ROLE INS_CO_CLAIMS_RW;
 
--- USAGE on the Streamlit compute pool is in post_deployment_grants.sql:
+-- USAGE on the Streamlit compute pool is in 001-dcm_post_deployment_grants.sql:
 -- DCM accepts it at analyze but leaves it out of the plan.
 
 -- Lets the app install pyproject.toml dependencies from Snowflake's built-in

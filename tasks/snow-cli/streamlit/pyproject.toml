@@ -3,7 +3,7 @@ name = "ins-co-claims-audit-streamlit"
 version = "0.1.0"
 requires-python = ">=3.11"
 # streamlit is pre-installed by the container runtime. The rest are installed
-# from snowflake.snowpark.pypi_shared_repository (attached in sql/batch-3).
+# from snowflake.snowpark.pypi_shared_repository (attached in sql/streamlit-post-deploy).
 dependencies = [
     "streamlit",
     "snowflake-snowpark-python",

@@ -2,11 +2,6 @@ version: '3'
 
 tasks:
 
-  dcm-pre-deploy:
-    desc: Runs dcm/pre_deploy.sql (objects DCM cannot DEFINE but the plan depends on, e.g. the compute pool).
-    cmds:
-      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f dcm/pre_deploy.sql
-
   dcm-plan:
     desc: Shows what the DCM project would create, alter, or drop, without applying anything.
     dir: dcm
@@ -19,11 +14,6 @@ tasks:
     prompt: Deploy the DCM plan shown above?
     cmds:
       - snow dcm deploy --connection "{{.CLI_CONNECTION_NAME}}" --target DEMO --alias "demo-init-$(date +%Y%m%d%H%M%S)"
-
-  dcm-post-deployment-grants:
-    desc: Runs dcm/post_deployment_grants.sql (grants DCM does not apply).
-    cmds:
-      - snow sql --connection "{{.CLI_CONNECTION_NAME}}" -f dcm/post_deployment_grants.sql
 
   sort-and-process-sql-folder:
     desc: Sorts and processes all SQL files in the given directory. Sorts and executes SQL files with numeric prefixes (e.g., 001-schema.sql)

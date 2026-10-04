@@ -35,8 +35,9 @@ tasks:
       - task: validate-prerequisites:snowcli
         silent: true
 
-      - task: snow-cli:dcm-pre-deploy
+      - task: snow-cli:sort-and-process-sql-folder
         vars:
+          SQL_SORT_PROCESS_DIR: sql/dcm-pre-deploy
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
       - task: snow-cli:dcm-plan
@@ -47,8 +48,9 @@ tasks:
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
-      - task: snow-cli:dcm-post-deployment-grants
+      - task: snow-cli:sort-and-process-sql-folder
         vars:
+          SQL_SORT_PROCESS_DIR: sql/dcm-post-deploy
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
   demo-up:
@@ -86,7 +88,7 @@ tasks:
 
       - task: snow-cli:sort-and-process-sql-folder
         vars:
-          SQL_SORT_PROCESS_DIR: sql/batch-3
+          SQL_SORT_PROCESS_DIR: sql/streamlit-post-deploy
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
   update-agents:
@@ -107,7 +109,7 @@ tasks:
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
-  demo-down:
+  demo-teardown:
     desc: |
       Usage: `task demo-down` will teardown the demo. In this case, dropping the database which is created as part of the demo.
 

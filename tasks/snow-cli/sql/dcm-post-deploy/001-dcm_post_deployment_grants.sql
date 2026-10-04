@@ -6,5 +6,5 @@
 -- -----------------------------------------------------------------------
 USE ROLE ACCOUNTADMIN;
 
--- The Streamlit app owner role runs the app on this pool (created in pre_deploy.sql).
+-- The Streamlit app owner role runs the app on this pool (created in 001-dcm_pre_deploy.sql).
 GRANT USAGE ON COMPUTE POOL INS_CO_STREAMLIT_POOL TO ROLE INS_CO_CLAIMS_RW;

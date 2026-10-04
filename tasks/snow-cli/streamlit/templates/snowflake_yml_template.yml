@@ -7,7 +7,7 @@ definition_version: 2
 #   * runtime_name + compute_pool select the container runtime (warehouse runtime
 #     is the legacy option). query_warehouse still runs the app's SQL.
 #   * Python dependencies live in pyproject.toml and are installed from Snowflake's
-#     built-in PyPI mirror, attached post-deploy in sql/batch-3, so no external
+#     built-in PyPI mirror, attached post-deploy in sql/streamlit-post-deploy, so no external
 #     access integration is needed.
 entities:
   ins_co_claims_audit_streamlit:

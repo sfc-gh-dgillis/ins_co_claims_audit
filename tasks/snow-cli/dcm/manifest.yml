@@ -5,7 +5,7 @@ type: DCM_PROJECT
 # schema, stage, tables, functions, procedures, semantic view, roles and grants.
 #
 # Objects DCM cannot DEFINE (compute pool, Cortex Search services, MCP server,
-# agent, Streamlit app) and data loading stay imperative — see pre_deploy.sql
+# agent, Streamlit app) and data loading stay imperative — see 001-dcm_pre_deploy.sql
 # and the sql/batch-* folders.
 
 default_target: DEMO

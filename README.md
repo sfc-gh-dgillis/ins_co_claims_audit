@@ -115,13 +115,13 @@ DOTENV_FILENAME=demo_admin.env task demo-init
 (for example, when run with the default `demo.env`). It then deploys the DCM project in
 `tasks/snow-cli/dcm/`:
 
-1. `pre_deploy.sql` creates the `INS_CO_STREAMLIT_POOL` compute pool (DCM can't define compute pools).
+1. `001-dcm_pre_deploy.sql` creates the `INS_CO_STREAMLIT_POOL` compute pool (DCM can't define compute pools).
 2. `snow dcm plan` prints what will be created, altered, or dropped.
 3. You're asked to confirm, then `snow dcm deploy` applies it:
    - the `DEMO_S_WH` warehouse, the `INS_CO` database and `LOSS_CLAIMS` schema, and the `LOSS_EVIDENCE` stage
    - the claims tables, the custom agent tool functions and procedure, and the `CA_INS_CO` semantic view
    - the `INS_CO_CLAIMS_*` and `INS_CO_GA_DEV` roles and all grants, including Cortex, Snowflake Intelligence, and the PyPI mirror
-4. `post_deployment_grants.sql` grants USAGE on the compute pool (DCM leaves that grant out of its plan).
+4. `001-dcm_post_deployment_grants.sql` grants USAGE on the compute pool (DCM leaves that grant out of its plan).
 
 To preview without deploying, run `DOTENV_FILENAME=demo_admin.env task snow-cli:dcm-plan`.
 
