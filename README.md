@@ -426,9 +426,22 @@ The DCM project (`UTIL.DCM_PROJECT_ARCHIVE.INS_CO_CLAIMS_AUDIT`) and its deploym
 
 ### Task Entry Points
 
-Only four tasks can be run directly: `demo-init`, `demo-up`, `demo-teardown` and `sync-agents`. Every other task (the `snow-cli:*`, `python:*` and `validate-prerequisites:*` tasks, plus `python-setup-for-agents`) is marked `internal: true`. They don't show in `task --list`, and only the entry points can call them.
+Only five tasks can be run directly: `demo-init`, `demo-up`, `demo-teardown`, `sync-agents` and `sync-workspace`. Every other task (the `snow-cli:*`, `python:*` and `validate-prerequisites:*` tasks, plus `python-setup-for-agents`) is marked `internal: true`. They don't show in `task --list`, and only the entry points can call them.
 
 To redo a single step, such as reloading data, recreating the agent or redeploying the Streamlit app, run `task demo-up` again. Its steps are idempotent: the SQL uses `CREATE OR REPLACE`, and uploads and deploys overwrite what is there.
+
+### Copying the Repo to a Snowflake Workspace
+
+A workspace connected to Git can only be created in Snowsight. As a workaround, `sync-workspace` copies the repo's git-tracked files into a private workspace:
+
+```bash
+DOTENV_FILENAME=demo_admin.env task sync-workspace
+```
+
+It recreates `USER$.PUBLIC.INS_CO_CLAIMS_AUDIT` (set `WORKSPACE_NAME=...` to use another name), uploads every file `git ls-files` lists, and checks the file count. Ignored files such as `.env/*.env` aren't uploaded.
+
+- The workspace is replaced on every run, so make changes in the repo, not the workspace.
+- `USER$` is the personal database of the connection's user, so run it with `demo_admin.env` (you), not `demo.env` (the service user).
 
 ### Customizing the Agent
 

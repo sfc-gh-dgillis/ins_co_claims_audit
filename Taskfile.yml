@@ -115,6 +115,23 @@ tasks:
         vars:
           CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
 
+  sync-workspace:
+    desc: |
+      Usage: `DOTENV_FILENAME=demo_admin.env task sync-workspace` copies the repo's git-tracked files into the
+        private workspace USER$.PUBLIC.INS_CO_CLAIMS_AUDIT (override with WORKSPACE_NAME=...). A workaround until
+        the workspace is git-synced: the workspace is recreated on every run, so edits made in it are lost.
+        USER$ is the connection user's personal database, so run it as yourself (demo_admin.env), not the
+        service user in demo.env.
+    prompt: Recreate the workspace? Edits made in it since the last sync will be lost.
+    cmds:
+      - task: validate-prerequisites:snowcli
+        silent: true
+
+      - task: snow-cli:sync-workspace
+        vars:
+          CLI_CONNECTION_NAME: $CLI_CONNECTION_NAME
+          WORKSPACE_NAME: '{{.WORKSPACE_NAME}}'
+
   demo-teardown:
     desc: |
       Usage: `task demo-teardown` removes everything demo-init and demo-up created. It runs pre_purge.sql

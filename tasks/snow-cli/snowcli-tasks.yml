@@ -44,6 +44,13 @@ tasks:
     cmds:
       - cmd/deploy-streamlit.sh "{{.STREAMLIT_APP_DIR}}"
 
+  sync-workspace:
+    desc: Recreates a private Snowflake workspace and uploads the repo's git-tracked files to it.
+    vars:
+      WORKSPACE_NAME: '{{.WORKSPACE_NAME | default "USER$.PUBLIC.INS_CO_CLAIMS_AUDIT"}}'
+    cmds:
+      - cmd/sync-workspace.sh ../.. '{{.WORKSPACE_NAME}}'
+
   generate-agent-sql:
     desc: Describes agents and generates SQL files for each agent from agent/input/agents.json.
     cmds:
